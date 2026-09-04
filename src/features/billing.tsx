@@ -4,7 +4,6 @@ import { MeloMark } from "@/components/brand/melo-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { dt, money, moneyExact } from "@/lib/format";
@@ -13,7 +12,6 @@ import {
   PLAN_ORDER,
   PLAN_COMPARE,
   annualMonthly,
-  cardBrandFromNumber,
   invoiceTotals,
   isTrialing,
   planById,
@@ -22,11 +20,13 @@ import {
   upcomingTotals,
 } from "@/lib/melo/billing";
 import { useMelo } from "@/lib/melo/store";
+import { checkoutUrl } from "@/lib/melo/stripe-plans";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import type { BillingCadence, BillingCard, BillingInvoice, Plan } from "@/lib/melo/types";
 import { cn } from "@/lib/utils";
 
 function hasCard(card: BillingCard | null | undefined): card is BillingCard {
-  return Boolean(card && card.last4 && card.last4 !== "0000");
+  return Boolean(card && ((card.last4 && card.last4 !== "0000") || card.brand === "stripe"));
 }
 
 export function BillingPane() {
@@ -190,12 +190,13 @@ export function BillingPane() {
             <div className="mt-4 flex items-center gap-3">
               <CardFace brand={billing.card.brand} />
               <div className="min-w-0 flex-1">
-                <div className="text-sm font-medium capitalize">
-                  {billing.card.brand} ···· {billing.card.last4}
+                <div className="text-sm font-medium">
+                  {billing.card.brand === "stripe" ? "Card on file with Stripe" : `${billing.card.brand} ···· ${billing.card.last4}`}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Expires {String(billing.card.expMonth).padStart(2, "0")}/{String(billing.card.expYear).slice(-2)}
-                  {billing.card.name ? ` · ${billing.card.name}` : ""}
+                  {billing.card.brand === "stripe"
+                    ? "Managed in Stripe. Change plan anytime."
+                    : `Expires ${String(billing.card.expMonth).padStart(2, "0")}/${String(billing.card.expYear).slice(-2)}${billing.card.name ? ` · ${billing.card.name}` : ""}`}
                 </div>
               </div>
               <Button size="sm" variant="outline" onClick={() => setPayOpen(true)}>
@@ -329,7 +330,7 @@ function CardFace({ brand }: { brand: string }) {
   return (
     <div className="flex h-10 w-14 shrink-0 items-end rounded-md bg-ink px-1.5 py-1">
       <span className="text-xs font-semibold tracking-wider text-primary-foreground">
-        {brand === "mastercard" ? "MC" : brand === "amex" ? "AMEX" : "VISA"}
+        {brand === "mastercard" ? "MC" : brand === "amex" ? "AMEX" : brand === "stripe" ? "STRIPE" : "VISA"}
       </span>
     </div>
   );
@@ -338,6 +339,7 @@ function CardFace({ brand }: { brand: string }) {
 function ChangePlanDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const billing = useMelo((s) => s.billing);
   const setPlan = useMelo((s) => s.setPlan);
+  const { user } = useCurrentUserState();
   const [cadence, setCadence] = useState<BillingCadence>(billing.cadence);
 
   useEffect(() => {
@@ -371,6 +373,7 @@ function ChangePlanDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
               onChoose={() => {
                 setPlan(p.id, cadence);
                 onOpenChange(false);
+                window.location.href = checkoutUrl(p.id, { email: user?.primaryEmail, userId: user?.id });
               }}
             />
           ))}
@@ -471,90 +474,25 @@ function CancelDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v:
 
 function PayDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const card = useMelo((s) => s.billing.card);
-  const update = useMelo((s) => s.updateCard);
-  const [number, setNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvc, setCvc] = useState("");
-  const [name, setName] = useState(card?.name ?? "");
-
-  useEffect(() => {
-    if (open) {
-      setName(card?.name ?? "");
-      setNumber("");
-      setExpiry("");
-      setCvc("");
-    }
-  }, [open, card?.name]);
-
-  const submit = () => {
-    const digits = number.replace(/\D/g, "");
-    if (digits.length < 13) return;
-    const [mm, yy] = expiry.split("/");
-    const expMonth = Number(mm);
-    const expYear = 2000 + Number(yy);
-    if (!expMonth || !expYear) return;
-    update({
-      brand: cardBrandFromNumber(digits),
-      last4: digits.slice(-4),
-      expMonth,
-      expYear,
-      name: name.trim(),
-    });
-    setNumber("");
-    setExpiry("");
-    setCvc("");
-    onOpenChange(false);
-  };
+  const billing = useMelo((s) => s.billing);
+  const { user } = useCurrentUserState();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogTitle>{hasCard(card) ? "Update payment method" : "Add payment method"}</DialogTitle>
-        <DialogDescription>Card details stay on this workspace. Melo never silently retries a failed charge.</DialogDescription>
-        <div className="mt-4 space-y-3">
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Cardholder</span>
-            <Input value={name} onChange={(e) => setName(e.target.value)} autoComplete="cc-name" />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium">Card number</span>
-            <Input
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-              inputMode="numeric"
-              autoComplete="cc-number"
-              placeholder="4242 4242 4242 4242"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium">Expiry</span>
-              <Input
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value)}
-                placeholder="09/28"
-                autoComplete="cc-exp"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium">CVC</span>
-              <Input
-                value={cvc}
-                onChange={(e) => setCvc(e.target.value)}
-                inputMode="numeric"
-                autoComplete="cc-csc"
-                placeholder="123"
-              />
-            </label>
-          </div>
-        </div>
+        <DialogDescription>Stripe takes the card. Melo never sees the number.</DialogDescription>
         <div className="mt-5 flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={submit}>
+          <Button
+            onClick={() => {
+              window.location.href = checkoutUrl(billing.planId, { email: user?.primaryEmail, userId: user?.id });
+            }}
+          >
             <CreditCard />
-            Save card
+            Continue to Stripe
           </Button>
         </div>
       </DialogContent>

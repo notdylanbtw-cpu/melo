@@ -5,6 +5,7 @@ import { uid } from "@/lib/utils";
 import { incGst, money, addMinsIso, timeOf } from "@/lib/format";
 import { createSeed } from "./seed";
 import { createFreshOffice, type OnboardingInput } from "./fresh";
+import { getTenantId } from "./office-sync";
 import { localAsk, toChat, type AskResult } from "./ask";
 import { nameFromEmail, parseMoneyAsk, priceFromBook, pricedSummary, type MoneyAsk } from "./price-ask";
 import { grantsFor, mapToolNamesToApps } from "./agent-tools";
@@ -139,6 +140,9 @@ type Actions = {
   transferCall: (staffId: string) => void;
   resetDemo: () => void;
   hydrateOffice: (input: OnboardingInput) => void;
+  adoptOffice: (data: Partial<MeloData>) => void;
+  confirmStripe: (planId: string, trialEndsAt?: string | null) => void;
+  resetTenant: () => void;
   markNotifsRead: () => void;
   markNotifRead: (id: string) => void;
   log: (text: string, agentId?: string) => void;
@@ -1484,6 +1488,20 @@ export const useMelo = create<MeloStore>()(
         const fresh = createFreshOffice(input);
         set({ ...fresh, ...uiDefaults });
       },
+      adoptOffice: (data) => set((s) => ({ ...s, ...data })),
+      confirmStripe: (planId, trialEndsAt) =>
+        set((s) => ({
+          billing: {
+            ...s.billing,
+            planId,
+            trialEndsAt: trialEndsAt ?? (planId === "growth" ? s.billing.trialEndsAt : null),
+            card: { brand: "stripe", last4: "onfile", expMonth: 0, expYear: 0, name: "Stripe" },
+          },
+        })),
+      resetTenant: () => {
+        const seed = createSeed();
+        set({ ...seed, ...uiDefaults });
+      },
       markNotifsRead: () => set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
       markNotifRead: (id: string) =>
         set((s) => ({ notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })),
@@ -1493,40 +1511,38 @@ export const useMelo = create<MeloStore>()(
         })),
     }),
     {
-      name: "melo-office-v2",
+      name: "melo-office-v3",
       version: 1,
       skipHydration: true,
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => ({
+        getItem: (name) => {
+          try {
+            return localStorage.getItem(`${name}:${getTenantId()}`);
+          } catch {
+            return null;
+          }
+        },
+        setItem: (name, value) => {
+          try {
+            localStorage.setItem(`${name}:${getTenantId()}`, value);
+          } catch {
+            /* ignore */
+          }
+        },
+        removeItem: (name) => {
+          try {
+            localStorage.removeItem(`${name}:${getTenantId()}`);
+          } catch {
+            /* ignore */
+          }
+        },
+      })),
       migrate: (persisted) => {
         const p = persisted as Record<string, unknown>;
         const { plans: _drop, ...rest } = p;
         const billing = (rest.billing ?? {}) as Record<string, unknown>;
         const seed = createSeed();
-        const persistedJobs = Array.isArray(rest.jobs) ? (rest.jobs as MeloData["jobs"]) : seed.jobs;
-        const jobs = persistedJobs.map((j) => {
-          const fromSeed = seed.jobs.find((s) => s.id === j.id);
-          let invoices = j.invoices;
-          if (fromSeed?.invoices.length) {
-            const have = new Set(j.invoices.map((i) => i.id));
-            const extra = fromSeed.invoices.filter((i) => !have.has(i.id));
-            if (extra.length) invoices = [...j.invoices, ...extra];
-          }
-          let quote = j.quote;
-          if (quote && quote.status === "sent" && !quote.signature) {
-            quote = {
-              ...quote,
-              signature: {
-                status: "awaiting",
-                sentAt: quote.sentAt,
-                sentChannel: j.channel === "email" || j.channel === "sms" || j.channel === "whatsapp" ? j.channel : "email",
-              },
-            };
-          }
-          if (fromSeed?.quote?.signature && quote && !quote.signature) {
-            quote = { ...quote, signature: fromSeed.quote.signature };
-          }
-          return { ...j, invoices, quote };
-        });
+        const jobs = Array.isArray(rest.jobs) ? (rest.jobs as MeloData["jobs"]) : [];
         return {
           ...rest,
           jobs,
@@ -1549,6 +1565,7 @@ export const useMelo = create<MeloStore>()(
           }),
           billing: {
             ...seed.billing,
+            ...billing,
             planId: billing.planId ?? seed.billing.planId,
             cadence: billing.cadence ?? seed.billing.cadence,
             contact: billing.contact ?? seed.billing.contact,

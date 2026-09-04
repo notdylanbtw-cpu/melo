@@ -6,6 +6,7 @@ import { relative } from "@/lib/format";
 import { useNavigate } from "@tanstack/react-router";
 import { Kbd } from "@/components/melo/empty";
 import { signOut } from "@/lib/auth/client";
+import { clearTenantCache } from "@/lib/melo/office-sync";
 import { cn } from "@/lib/utils";
 
 export function Topbar({ onMenu }: { onMenu: () => void }) {
@@ -106,6 +107,8 @@ export function Topbar({ onMenu }: { onMenu: () => void }) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => {
+                useMelo.getState().resetTenant();
+                clearTenantCache();
                 void signOut("/login").catch(() => undefined);
               }}
             >

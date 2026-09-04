@@ -411,7 +411,7 @@ export type Plan = {
 };
 
 export type BillingCard = {
-  brand: "visa" | "mastercard" | "amex";
+  brand: "visa" | "mastercard" | "amex" | "stripe";
   last4: string;
   expMonth: number;
   expYear: number;

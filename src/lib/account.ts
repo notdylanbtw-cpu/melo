@@ -19,6 +19,10 @@ export type AccountRecord = {
   onboardingComplete: boolean;
   totpEnabled: boolean;
   isHq: boolean;
+  planId: string;
+  trialEndsAt: string | null;
+  billingStatus: string;
+  officeJson: string;
 };
 
 type Row = {
@@ -38,6 +42,10 @@ type Row = {
   totp_secret: string | null;
   totp_enabled: boolean | string | number;
   is_hq: boolean | string | number;
+  plan_id?: string;
+  trial_ends_at?: string | null;
+  billing_status?: string;
+  office_json?: string;
 };
 
 function asBool(v: boolean | string | number | null | undefined) {
@@ -71,6 +79,10 @@ function toAccount(row: Row): AccountRecord {
     onboardingComplete: asBool(row.onboarding_complete),
     totpEnabled: asBool(row.totp_enabled),
     isHq: asBool(row.is_hq),
+    planId: row.plan_id || "growth",
+    trialEndsAt: row.trial_ends_at ?? null,
+    billingStatus: row.billing_status || "unpaid",
+    officeJson: row.office_json ?? "",
   };
 }
 
@@ -104,10 +116,13 @@ export const completeOnboarding = createServerFn({ method: "POST" })
     afterHours: string;
     tools: string[];
     email?: string;
+    planId?: string;
   }) => input)
   .handler(async ({ context, data }) => {
     const sql = await getSql();
     await loadOrCreate(context.userId);
+    const planId = data.planId || "growth";
+    const trial = planId === "growth" ? new Date(Date.now() + 7 * 86400000).toISOString() : null;
     await sql`
       update accounts set
         owner_name = ${data.ownerName.trim()},
@@ -121,11 +136,43 @@ export const completeOnboarding = createServerFn({ method: "POST" })
         hours = ${data.hours.trim()},
         after_hours = ${data.afterHours.trim()},
         tools = ${JSON.stringify(data.tools)},
-        onboarding_complete = true
+        onboarding_complete = true,
+        plan_id = ${planId},
+        trial_ends_at = ${trial},
+        billing_status = ${planId === "growth" ? "trial" : "unpaid"}
       where user_id = ${context.userId}
     `;
     const row = await loadOrCreate(context.userId);
     return toAccount(row);
+  });
+
+export const saveOfficeSnapshot = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((input: { json: string }) => input)
+  .handler(async ({ context, data }) => {
+    if (data.json.length > 4_000_000) throw new Error("Office is too large to save.");
+    const sql = await getSql();
+    await loadOrCreate(context.userId);
+    await sql`update accounts set office_json = ${data.json} where user_id = ${context.userId}`;
+    return { ok: true as const };
+  });
+
+export const applyCheckout = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((input: { planId: string }) => input)
+  .handler(async ({ context, data }) => {
+    const planId = ["starter", "growth", "firm"].includes(data.planId) ? data.planId : "growth";
+    const trial = planId === "growth" ? new Date(Date.now() + 7 * 86400000).toISOString() : null;
+    const sql = await getSql();
+    await loadOrCreate(context.userId);
+    await sql`
+      update accounts set
+        plan_id = ${planId},
+        trial_ends_at = ${trial},
+        billing_status = ${planId === "growth" ? "trial" : "active"}
+      where user_id = ${context.userId}
+    `;
+    return { ok: true as const, planId, trialEndsAt: trial };
   });
 
 export const persistOfficeCopy = createServerFn({ method: "POST" })
@@ -229,12 +276,10 @@ export const getElevenLabs = createServerFn({ method: "GET" })
       select eleven_api_key, eleven_voice_id from accounts where user_id = ${context.userId} limit 1
     `;
     const key = rows[0]?.eleven_api_key?.trim() || "";
-    const { elevenLabsKey, defaultElevenVoiceId } = await import("@/lib/voice/tts");
-    const workspace = elevenLabsKey();
-    const connected = Boolean(key || workspace);
+    const { defaultElevenVoiceId } = await import("@/lib/voice/tts");
     return {
-      connected,
-      last4: (key || workspace).slice(-4),
+      connected: Boolean(key),
+      last4: key.slice(-4),
       voiceId: rows[0]?.eleven_voice_id || defaultElevenVoiceId(),
     };
   });

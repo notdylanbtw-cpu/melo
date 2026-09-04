@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { NAV, isBranch, type NavBadge, type NavEntry, type NavLeaf } from "./nav";
 import { useMelo } from "@/lib/melo/store";
 import { signOut } from "@/lib/auth/client";
+import { clearTenantCache } from "@/lib/melo/office-sync";
 import { cn } from "@/lib/utils";
 
 function pathActive(pathname: string, to: string) {
@@ -145,6 +146,8 @@ export function Sidebar({ onNavigate, previewPath }: { onNavigate?: () => void; 
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => {
+                useMelo.getState().resetTenant();
+                clearTenantCache();
                 void signOut("/login").catch(() => undefined);
               }}
             >

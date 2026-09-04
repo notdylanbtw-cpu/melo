@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { completeOnboarding, beginTotp, confirmTotp } from "@/lib/account";
-import { cardBrandFromNumber } from "@/lib/melo/billing";
+import { completeOnboarding, beginTotp, confirmTotp, saveOfficeSnapshot } from "@/lib/account";
+import { checkoutUrl } from "@/lib/melo/stripe-plans";
+import { snapshotOffice } from "@/lib/melo/office-sync";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { markTwoFactorOk } from "@/lib/auth/two-factor";
 import { MeloWordmark } from "@/components/brand/melo-mark";
@@ -21,7 +22,6 @@ export function OnboardPage() {
   const { user, isPending } = useCurrentUserState();
   const navigate = useNavigate();
   const hydrate = useMelo((s) => s.hydrateOffice);
-  const updateCard = useMelo((s) => s.updateCard);
   const [step, setStep] = useState(0);
   const [ownerName, setOwnerName] = useState("");
   const [businessName, setBusinessName] = useState("");
@@ -36,10 +36,6 @@ export function OnboardPage() {
   const [planId, setPlanId] = useState(readChosenPlan);
   const [secret, setSecret] = useState<string | null>(null);
   const [code, setCode] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -57,26 +53,6 @@ export function OnboardPage() {
 
   const services = servicesRaw.split(/[,|\n]/).map((s) => s.trim()).filter(Boolean);
   const suburbs = suburbsRaw.split(/[,|\n]/).map((s) => s.trim()).filter(Boolean);
-  const cardDigits = cardNumber.replace(/\D/g, "");
-  const [expMonthRaw, expYearRaw] = cardExpiry.split("/");
-  const cardReady =
-    cardName.trim().length > 1 &&
-    cardDigits.length >= 13 &&
-    Number(expMonthRaw) >= 1 &&
-    Number(expMonthRaw) <= 12 &&
-    (expYearRaw ?? "").trim().length >= 2 &&
-    cardCvc.replace(/\D/g, "").length >= 3;
-
-  const saveCard = () => {
-    const [mm, yy] = cardExpiry.split("/");
-    updateCard({
-      brand: cardBrandFromNumber(cardDigits),
-      last4: cardDigits.slice(-4),
-      expMonth: Number(mm),
-      expYear: 2000 + Number(yy),
-      name: cardName.trim(),
-    });
-  };
 
   const finish = async (withTotp: boolean) => {
     setBusy(true);
@@ -95,6 +71,7 @@ export function OnboardPage() {
           afterHours,
           tools,
           email: user.primaryEmail ?? undefined,
+          planId,
         },
       });
       saveChosenPlan(planId);
@@ -112,9 +89,9 @@ export function OnboardPage() {
         email: account.email ?? user.primaryEmail ?? "",
         planId,
       });
-      saveCard();
+      await saveOfficeSnapshot({ data: { json: JSON.stringify(snapshotOffice(useMelo.getState())) } }).catch(() => undefined);
       if (withTotp) markTwoFactorOk(user.id);
-      window.location.href = "/app";
+      window.location.href = checkoutUrl(planId, { email: user.primaryEmail, userId: user.id });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn’t save this");
       setBusy(false);
@@ -274,40 +251,18 @@ export function OnboardPage() {
       can: Boolean(planId),
     },
     {
-      title: planId === TRIAL_PLAN_ID ? "Card for after the trial" : "Card",
+      title: planId === TRIAL_PLAN_ID ? "Start the 7-day trial" : `Subscribe to ${planById(planId).name}`,
       body: (
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
             {planId === TRIAL_PLAN_ID
-              ? `${TRIAL_DAYS}-day free trial on ${planById(planId).name}. Change plan anytime.`
-              : `${planById(planId).name} bills to this card. Change plan anytime in Billing.`}
+              ? `Stripe takes the card. ${TRIAL_DAYS} days on ${planById(planId).name}, then the plan bills. Cancel anytime.`
+              : `Stripe takes the card for ${planById(planId).name}. Melo never sees the number.`}
           </p>
-          <Input value={cardName} onChange={(e) => setCardName(e.target.value)} autoComplete="cc-name" placeholder="Name on card" />
-          <Input
-            value={cardNumber}
-            onChange={(e) => setCardNumber(e.target.value)}
-            inputMode="numeric"
-            autoComplete="cc-number"
-            placeholder="4242 4242 4242 4242"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              value={cardExpiry}
-              onChange={(e) => setCardExpiry(e.target.value)}
-              autoComplete="cc-exp"
-              placeholder="09/28"
-            />
-            <Input
-              value={cardCvc}
-              onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              inputMode="numeric"
-              autoComplete="cc-csc"
-              placeholder="CVC"
-            />
-          </div>
+          <p className="text-xs text-muted-foreground">You’ll confirm on Stripe, then land back in the office.</p>
         </div>
       ),
-      can: cardReady,
+      can: true,
     },
     {
       title: "Lock the office with 2FA",
@@ -346,11 +301,11 @@ export function OnboardPage() {
         ) : (
           <div className="ml-auto flex gap-2">
             <Button type="button" variant="outline" disabled={busy} onClick={() => void finish(false)}>
-              Skip for now
+              Skip 2FA, pay with Stripe
             </Button>
             {secret ? (
               <Button type="button" disabled={busy || code.length !== 6} onClick={() => void confirm()}>
-                {busy ? "Saving…" : "Verify and open office"}
+                {busy ? "Saving…" : "Verify, then Stripe"}
               </Button>
             ) : (
               <Button type="button" disabled={busy} onClick={() => void startTotp()}>

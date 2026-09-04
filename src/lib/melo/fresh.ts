@@ -149,8 +149,8 @@ export function createFreshOffice(o: OnboardingInput): MeloData {
         tools.some((t) => i.name.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(i.name.toLowerCase()));
       return {
         ...i,
-        status: hit ? "connected" : "available",
-        detail: hit ? "Connected at signup" : i.detail.replace(/Northside Plumbing/g, o.businessName),
+        status: "available" as const,
+        detail: hit ? "Listed at signup — connect to go live" : i.detail.replace(/Northside Plumbing/g, o.businessName),
       };
     }),
     automations: seed.automations.map((a) => ({ ...a, on: false })),
