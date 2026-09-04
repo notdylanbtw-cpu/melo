@@ -9,5 +9,6 @@ export async function twilioFields(request: Request) {
     digits: get("Digits"),
     status: get("CallStatus"),
     duration: get("CallDuration"),
+    body: get("Body"),
   };
 }

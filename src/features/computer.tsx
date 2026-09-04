@@ -98,7 +98,7 @@ export function ComputerPage() {
         <ul className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <li className="rounded-xl border border-border p-3">
             <div className="font-medium">Phone, 24/7</div>
-            <p className="mt-1 text-muted-foreground">Twilio hits this computer directly. The receptionist answers whether you’re in the app or not.</p>
+            <p className="mt-1 text-muted-foreground">Your Melo number hits this computer directly. The receptionist answers whether you’re in the app or not.</p>
           </li>
           <li className="rounded-xl border border-border p-3">
             <div className="font-medium">Inbox watch</div>

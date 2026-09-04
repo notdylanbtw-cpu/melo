@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/misc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { getElevenLabs, persistOfficeCopy, saveElevenLabs } from "@/lib/account";
+import { persistOfficeCopy } from "@/lib/account";
 import { INDUSTRY_OPTIONS } from "@/lib/melo/terminology";
 import { useMelo } from "@/lib/melo/store";
 import type { Industry, InvoiceTemplateKind } from "@/lib/melo/types";
@@ -359,17 +359,17 @@ function NumbersPane() {
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="text-xl font-semibold">Numbers</h1>
       <div className="rounded-xl border border-border bg-canvas p-4">
-        <div className="text-sm text-muted-foreground">Primary · Twilio</div>
-        <div className="mt-1 text-lg font-semibold tabular">{number || "Not connected"}</div>
+        <div className="text-sm text-muted-foreground">Primary · hosted by Melo</div>
+        <div className="mt-1 text-lg font-semibold tabular">{number || "No number yet"}</div>
         <div className={cn("mt-2 text-sm", connected ? "text-success" : "text-muted-foreground")}>
-          {detail || "Point a Twilio number at Melo to answer the office line."}
+          {detail || "Melo buys an Australian number and points it at your receptionist. You don’t need Twilio."}
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          Warm-transfer to your mobile when they ask for you. Otherwise book and summarise.
+          Included in your plan. Melo pays the carrier. Warm-transfer to your mobile when they ask for you.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button size="sm" onClick={() => setOpen(true)}>
-            {connected ? "Reconnect" : "Connect Twilio"}
+            {connected ? "Replace number" : "Get a Melo number"}
           </Button>
           <Button
             size="sm"
@@ -537,33 +537,6 @@ function VoicePane() {
   const voice = useMelo((s) => s.voice);
   const update = useMelo((s) => s.updateVoice);
   const [playing, setPlaying] = useState(false);
-  const [status, setStatus] = useState<{ connected: boolean; last4: string; voiceId: string } | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    void getElevenLabs()
-      .then(setStatus)
-      .catch(() => setStatus({ connected: false, last4: "", voiceId: "" }));
-  }, []);
-
-  const save = async () => {
-    const key = voice.elevenKey?.trim();
-    if (!key) {
-      toast.success("Voice settings saved");
-      return;
-    }
-    setBusy(true);
-    try {
-      const r = await saveElevenLabs({ data: { apiKey: key, voiceId: voice.elevenVoiceId } });
-      setStatus({ connected: true, last4: r.last4, voiceId: voice.elevenVoiceId || status?.voiceId || "" });
-      update({ elevenKey: "" });
-      toast.success("ElevenLabs connected");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn’t save the key");
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const play = () => {
     setPlaying(true);
@@ -575,7 +548,6 @@ function VoicePane() {
           body: JSON.stringify({
             text: voice.greeting,
             voice: voice.voice,
-            elevenVoiceId: voice.elevenVoiceId || status?.voiceId,
           }),
         });
         if (!res.ok) throw new Error("sample failed");
@@ -595,31 +567,9 @@ function VoicePane() {
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="text-xl font-semibold">Receptionist voice</h1>
       <p className="text-sm text-muted-foreground">
-        ElevenLabs speaks every live call — greeting, answers, hold and transfer. Isla is Emma, Australian.
+        Melo hosts the voice. Isla is the Australian receptionist. Included in every plan — you don’t need ElevenLabs.
       </p>
-      {status?.connected ? (
-        <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm">
-          Connected · key …{status.last4} · Emma
-        </p>
-      ) : (
-        <p className="text-sm text-muted-foreground">Paste an ElevenLabs key that starts with sk_.</p>
-      )}
-      <Field label="ElevenLabs API key">
-        <Input
-          type="password"
-          autoComplete="off"
-          value={voice.elevenKey ?? ""}
-          onChange={(e) => update({ elevenKey: e.target.value })}
-          placeholder={status?.connected ? "Replace key…" : "sk_…"}
-        />
-      </Field>
-      <Field label="Voice ID">
-        <Input
-          value={voice.elevenVoiceId ?? status?.voiceId ?? ""}
-          onChange={(e) => update({ elevenVoiceId: e.target.value })}
-          placeholder="Emma is the default"
-        />
-      </Field>
+      <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm">Hosted by Melo · ElevenLabs on our account</p>
       <Field label="Locale">
         <Input value={voice.locale} readOnly />
       </Field>
@@ -655,9 +605,6 @@ function VoicePane() {
         <Textarea value={voice.afterHours} onChange={(e) => update({ afterHours: e.target.value })} />
       </Field>
       <div className="flex gap-2">
-        <Button size="sm" variant="outline" onClick={() => void save()} disabled={busy}>
-          {busy ? "Saving…" : "Save"}
-        </Button>
         <Button size="sm" onClick={play}>
           {playing ? "Playing…" : "Play sample"}
         </Button>

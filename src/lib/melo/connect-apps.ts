@@ -39,10 +39,10 @@ export const APP_META: Record<string, AppMeta> = {
   twilio: {
     id: "twilio",
     color: "#F22F46",
-    tagline: "Office number and SMS",
+    tagline: "Melo number — we buy it, we host it",
     scopes: [
-      { title: "Answer inbound calls", hint: "Receptionist picks up as you, 24/7" },
-      { title: "Send and receive SMS", hint: "Windows, quotes and missed-call follow-up" },
+      { title: "Answer inbound calls", hint: "Receptionist picks up as you, 24/7. Melo pays the carrier." },
+      { title: "Send and receive SMS", hint: "Windows, quotes and missed-call follow-up on the same number" },
       { title: "Transfer to your mobile", hint: "Warm handoff when they ask for a person" },
     ],
   },
@@ -196,7 +196,7 @@ export const APP_META: Record<string, AppMeta> = {
   whatsapp: {
     id: "whatsapp",
     color: "#25D366",
-    tagline: "Business chats",
+    tagline: "On your Melo number",
     scopes: [
       { title: "Receive messages", hint: "They land in Inbox next to the call" },
       { title: "Send replies", hint: "Windows, quotes, follow-ups" },
@@ -232,9 +232,9 @@ export const APP_META: Record<string, AppMeta> = {
   imessage: {
     id: "imessage",
     color: "#34C759",
-    tagline: "Blue bubbles",
+    tagline: "Blue bubbles on your Melo number",
     scopes: [
-      { title: "Receive iMessage", hint: "Via Sendblue or LoopMessage" },
+      { title: "Receive iMessage", hint: "Melo hosts the sender — no Sendblue account" },
       { title: "Send iMessage", hint: "Same thread as SMS" },
     ],
   },

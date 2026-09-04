@@ -121,6 +121,62 @@ export async function sendSms(creds: TwilioCreds, to: string, body: string) {
   });
 }
 
+export async function sendWhatsApp(creds: TwilioCreds, to: string, body: string) {
+  return twilioFetch(creds, "/Messages.json", {
+    To: `whatsapp:${digits(to)}`,
+    From: `whatsapp:${digits(creds.phoneNumber)}`,
+    Body: body,
+  });
+}
+
+export type AvailableNumber = { phone: string; locality: string; region: string };
+
+export async function searchAvailable(creds: Pick<TwilioCreds, "accountSid" | "authToken">, areaCode?: string): Promise<AvailableNumber[]> {
+  const q = new URLSearchParams({ PageSize: "8", VoiceEnabled: "true", SmsEnabled: "true" });
+  if (areaCode) q.set("AreaCode", areaCode);
+  const json = await twilioFetch(creds as TwilioCreds, `/AvailablePhoneNumbers/AU/Local.json?${q.toString()}`);
+  const list = (Array.isArray(json.available_phone_numbers) ? json.available_phone_numbers : []) as {
+    phone_number?: string;
+    locality?: string;
+    region?: string;
+  }[];
+  return list.map((n) => ({
+    phone: n.phone_number ?? "",
+    locality: n.locality ?? "",
+    region: n.region ?? "",
+  })).filter((n) => n.phone);
+}
+
+export async function buyNumber(
+  creds: Pick<TwilioCreds, "accountSid" | "authToken">,
+  phone: string,
+  origin: string,
+  friendlyName: string,
+) {
+  return twilioFetch(creds as TwilioCreds, "/IncomingPhoneNumbers.json", {
+    PhoneNumber: digits(phone),
+    FriendlyName: friendlyName.slice(0, 64),
+    VoiceUrl: `${origin}/api/voice/inbound`,
+    VoiceMethod: "POST",
+    SmsUrl: `${origin}/api/sms/inbound`,
+    SmsMethod: "POST",
+    StatusCallback: `${origin}/api/voice/status`,
+    StatusCallbackMethod: "POST",
+  });
+}
+
+export function hydrateTwilio(stored: Record<string, string>, number: string, platform: { accountSid: string; authToken: string } | null): TwilioCreds {
+  const sid = stored.accountSid || platform?.accountSid || "";
+  const token = stored.authToken || platform?.authToken || "";
+  return {
+    accountSid: sid,
+    authToken: token,
+    phoneNumber: digits(stored.phoneNumber || number),
+    phoneSid: stored.phoneSid || undefined,
+    ownerPhone: stored.ownerPhone ? digits(stored.ownerPhone) : undefined,
+  };
+}
+
 export function sayVoice(name: string) {
   if (name === "Jack") return "Polly.Russell";
   return "Polly.Nicole";

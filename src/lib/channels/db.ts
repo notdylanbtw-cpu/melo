@@ -1,6 +1,7 @@
 import { getSql } from "@/lib/db";
 import { randomUUID } from "node:crypto";
-import type { TwilioCreds } from "@/lib/voice/twilio";
+import { hydrateTwilio, type TwilioCreds } from "@/lib/voice/twilio";
+import { platformTwilio } from "@/lib/platform";
 
 export type ChannelKind = "voice" | "whatsapp" | "messenger" | "facebook" | "instagram" | "imessage" | "widget";
 
@@ -75,13 +76,18 @@ export async function getChannel(userId: string, kind: ChannelKind) {
   }>`select * from channel_accounts where user_id = ${userId} and kind = ${kind} limit 1`;
   const r = rows[0];
   if (!r) return null;
+  const credentials = parseCreds(r.credentials);
+  const hydrated =
+    r.kind === "voice" || r.kind === "whatsapp"
+      ? (hydrateTwilio(credentials, r.external_id, platformTwilio()) as unknown as Record<string, string>)
+      : credentials;
   return {
     id: r.id,
     userId: r.user_id,
     kind: r.kind as ChannelKind,
     status: r.status as ChannelAccount["status"],
     externalId: r.external_id,
-    credentials: parseCreds(r.credentials),
+    credentials: hydrated,
     webhookSecret: r.webhook_secret,
     detail: r.detail,
     connectedAt: r.connected_at,
@@ -131,7 +137,7 @@ export async function findVoiceByNumber(to: string) {
   if (!hit) return null;
   return {
     userId: hit.user_id,
-    creds: parseCreds(hit.credentials) as unknown as TwilioCreds,
+    creds: hydrateTwilio(parseCreds(hit.credentials), hit.external_id, platformTwilio()),
     number: hit.external_id,
   };
 }

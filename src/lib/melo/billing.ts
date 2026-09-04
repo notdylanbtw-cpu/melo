@@ -12,7 +12,7 @@ export const PLANS: Plan[] = [
     automations: 10,
     teamMembers: 3,
     blurb: "Reception, inbox and a calendar for a solo operator.",
-    features: ["Receptionist", "Inbox", "Calendar", "Knowledge", "Website widget"],
+    features: ["Receptionist", "Melo number included", "Inbox", "Calendar", "Knowledge", "Website widget"],
   },
   {
     id: "growth",
@@ -54,6 +54,8 @@ export const PLAN_COMPARE: PlanCompare[] = [
     id: "starter",
     included: [
       "24/7 AI receptionist",
+      "Melo number — we buy it, we host it",
+      "Voice & model hosted by Melo",
       "Inbox — phone, SMS, WhatsApp, Instagram, web",
       "Calendar",
       "Train on your website",
@@ -118,6 +120,8 @@ export const COMPARE_GROUPS: { name: string; rows: { label: string; starter: Com
   {
     name: "Front office",
     rows: [
+      { label: "Melo number included", starter: true, growth: true, firm: true },
+      { label: "Voice, SMS & model hosted by Melo", starter: true, growth: true, firm: true },
       { label: "24/7 AI receptionist", starter: true, growth: true, firm: true },
       { label: "Transfers & barge-in", starter: true, growth: true, firm: true },
       { label: "Phone, SMS, WhatsApp, Instagram, web", starter: true, growth: true, firm: true },

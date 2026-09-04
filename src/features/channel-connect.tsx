@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { connectIMessage, connectMetaChannel, connectTwilio } from "@/lib/channels/actions";
+import { enableMeloChannel, listMeloNumbers, provisionMeloNumber } from "@/lib/channels/actions";
 import { toast } from "sonner";
 
 export type ConnectKind = "twilio" | "whatsapp" | "instagram" | "messenger" | "facebook" | "imessage";
+
+const CITIES: { label: string; area: string }[] = [
+  { label: "Sydney", area: "2" },
+  { label: "Melbourne", area: "3" },
+  { label: "Brisbane", area: "7" },
+  { label: "Adelaide / Perth", area: "8" },
+];
 
 export function ChannelConnectDialog({
   kind,
@@ -19,36 +26,51 @@ export function ChannelConnectDialog({
   onDone?: () => void;
 }) {
   if (!kind) return null;
+  const number = kind === "twilio";
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-md">
-        <DialogTitle>Connect {label(kind)}</DialogTitle>
-        <DialogDescription>Credentials stay on your workspace. Melo uses them to send and receive.</DialogDescription>
-        {kind === "twilio" ? <TwilioFields onClose={onClose} onDone={onDone} /> : null}
-        {kind === "imessage" ? <IMessageFields onClose={onClose} onDone={onDone} /> : null}
-        {kind !== "twilio" && kind !== "imessage" ? <MetaFields kind={kind} onClose={onClose} onDone={onDone} /> : null}
+        <DialogTitle>{number ? "Get a Melo number" : `Turn on ${label(kind)}`}</DialogTitle>
+        <DialogDescription>
+          {number
+            ? "Melo buys and hosts the line. You don’t need Twilio. Voice, SMS and the receptionist are included in your plan."
+            : "Melo hosts this channel on your office. No API keys — we pay the vendor, you just use it."}
+        </DialogDescription>
+        {number ? <MeloNumberFields onClose={onClose} onDone={onDone} /> : <EnableFields kind={kind} onClose={onClose} onDone={onDone} />}
       </DialogContent>
     </Dialog>
   );
 }
 
 function label(kind: ConnectKind) {
-  return { twilio: "Twilio", whatsapp: "WhatsApp", instagram: "Instagram", messenger: "Messenger", facebook: "Facebook", imessage: "iMessage" }[kind];
+  return { twilio: "Melo number", whatsapp: "WhatsApp", instagram: "Instagram", messenger: "Messenger", facebook: "Facebook", imessage: "iMessage" }[kind];
 }
 
-function TwilioFields({ onClose, onDone }: { onClose: () => void; onDone?: () => void }) {
-  const [accountSid, setAccountSid] = useState("");
-  const [authToken, setAuthToken] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+function MeloNumberFields({ onClose, onDone }: { onClose: () => void; onDone?: () => void }) {
   const [ownerPhone, setOwnerPhone] = useState("");
+  const [area, setArea] = useState("2");
+  const [pick, setPick] = useState("");
+  const [choices, setChoices] = useState<{ phone: string; locality: string }[]>([]);
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(true);
+
+  useEffect(() => {
+    void listMeloNumbers({ data: { areaCode: area } })
+      .then((r) => {
+        setReady(r.ready);
+        setChoices(r.numbers.map((n) => ({ phone: n.phone, locality: n.locality })));
+        if (r.numbers[0] && !pick) setPick(r.numbers[0].phone);
+      })
+      .catch(() => setReady(false));
+  }, [area]);
+
   return (
     <form
       className="mt-4 space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         setBusy(true);
-        void connectTwilio({ data: { accountSid, authToken, phoneNumber, ownerPhone } })
+        void provisionMeloNumber({ data: { ownerPhone, areaCode: area, phone: pick || undefined } })
           .then((r) => {
             toast.success(`Receptionist live on ${r.number}`);
             onDone?.();
@@ -58,119 +80,92 @@ function TwilioFields({ onClose, onDone }: { onClose: () => void; onDone?: () =>
           .finally(() => setBusy(false));
       }}
     >
-      <Field label="Account SID">
-        <Input value={accountSid} onChange={(e) => setAccountSid(e.target.value)} placeholder="ACxxxxxxxx" required />
+      {!ready ? (
+        <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm">
+          Melo’s carrier is coming online. Leave your mobile — we’ll drop a number on this office the moment it’s attached.
+        </p>
+      ) : null}
+      <Field label="City">
+        <div className="flex flex-wrap gap-1.5">
+          {CITIES.map((c) => (
+            <button
+              key={c.area}
+              type="button"
+              onClick={() => setArea(c.area)}
+              className={`rounded-full px-3 py-1 text-xs font-medium ${area === c.area ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
       </Field>
-      <Field label="Auth token">
-        <Input type="password" value={authToken} onChange={(e) => setAuthToken(e.target.value)} required />
-      </Field>
-      <Field label="Twilio number">
-        <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+61…" required />
-      </Field>
-      <Field label="Your mobile (transfers)">
-        <Input value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)} placeholder="+61…" required />
+      {choices.length ? (
+        <Field label="Number">
+          <select
+            className="h-10 w-full rounded-md border border-border bg-canvas px-3 text-sm"
+            value={pick}
+            onChange={(e) => setPick(e.target.value)}
+          >
+            {choices.map((n) => (
+              <option key={n.phone} value={n.phone}>
+                {n.phone} {n.locality ? `· ${n.locality}` : ""}
+              </option>
+            ))}
+          </select>
+        </Field>
+      ) : null}
+      <Field label="Your mobile — for transfers">
+        <Input value={ownerPhone} onChange={(e) => setOwnerPhone(e.target.value)} placeholder="04…" required />
       </Field>
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
         <Button type="submit" disabled={busy}>
-          {busy ? "Connecting…" : "Connect"}
+          {busy ? "Getting the number…" : "Get this number"}
         </Button>
       </div>
     </form>
   );
 }
 
-function MetaFields({
-  kind,
-  onClose,
-  onDone,
-}: {
-  kind: Exclude<ConnectKind, "twilio" | "imessage">;
-  onClose: () => void;
-  onDone?: () => void;
-}) {
-  const [token, setToken] = useState("");
-  const [externalId, setExternalId] = useState("");
+function EnableFields({ kind, onClose, onDone }: { kind: ConnectKind; onClose: () => void; onDone?: () => void }) {
   const [busy, setBusy] = useState(false);
   return (
-    <form
-      className="mt-4 space-y-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        setBusy(true);
-        void connectMetaChannel({ data: { kind, token, externalId } })
-          .then((r) => {
-            toast.success(`${label(kind)} live · ${r.label}`);
-            onDone?.();
-            onClose();
-          })
-          .catch((err: Error) => toast.error(err.message))
-          .finally(() => setBusy(false));
-      }}
-    >
-      <Field label={kind === "whatsapp" ? "Phone number ID" : "Page or account ID"}>
-        <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} required />
-      </Field>
-      <Field label="Access token">
-        <Input type="password" value={token} onChange={(e) => setToken(e.target.value)} required />
-      </Field>
-      <div className="flex justify-end gap-2 pt-2">
+    <div className="mt-4 space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Melo pays {label(kind)} and routes it to this office. Callers and messages stay on your Melo Computer.
+      </p>
+      <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={busy}>
-          {busy ? "Connecting…" : "Connect"}
+        <Button
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            void enableMeloChannel({ data: kind === "twilio" ? "voice" : kind })
+              .then((r) => {
+                toast.success(r.detail);
+                onDone?.();
+                onClose();
+              })
+              .catch((err: Error) => toast.error(err.message))
+              .finally(() => setBusy(false));
+          }}
+        >
+          {busy ? "Turning on…" : "Turn on"}
         </Button>
       </div>
-    </form>
-  );
-}
-
-function IMessageFields({ onClose, onDone }: { onClose: () => void; onDone?: () => void }) {
-  const [apiKey, setApiKey] = useState("");
-  const [from, setFrom] = useState("");
-  const [busy, setBusy] = useState(false);
-  return (
-    <form
-      className="mt-4 space-y-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        setBusy(true);
-        void connectIMessage({ data: { provider: "sendblue", apiKey, from } })
-          .then(() => {
-            toast.success("iMessage connected");
-            onDone?.();
-            onClose();
-          })
-          .catch((err: Error) => toast.error(err.message))
-          .finally(() => setBusy(false));
-      }}
-    >
-      <Field label="Sendblue API key">
-        <Input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} required />
-      </Field>
-      <Field label="From number">
-        <Input value={from} onChange={(e) => setFrom(e.target.value)} placeholder="+61…" required />
-      </Field>
-      <div className="flex justify-end gap-2 pt-2">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={busy}>
-          {busy ? "Connecting…" : "Connect"}
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="block text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <div className="mt-1">{children}</div>
+    <label className="block space-y-1.5 text-sm">
+      <span className="font-medium">{label}</span>
+      {children}
     </label>
   );
 }

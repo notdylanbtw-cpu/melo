@@ -45,6 +45,7 @@ import { Route as SignQuoteIdRouteImport } from './routes/sign.$quoteId'
 import { Route as WSlugRouteImport } from './routes/w.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiComputerTickRouteImport } from './routes/api/computer/tick'
+import { Route as ApiSmsInboundRouteImport } from './routes/api/sms/inbound'
 import { Route as ApiVoiceGatherRouteImport } from './routes/api/voice/gather'
 import { Route as ApiVoiceHoldRouteImport } from './routes/api/voice/hold'
 import { Route as ApiVoiceInboundRouteImport } from './routes/api/voice/inbound'
@@ -237,6 +238,11 @@ const ApiComputerTickRoute = ApiComputerTickRouteImport.update({
   path: '/api/computer/tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSmsInboundRoute = ApiSmsInboundRouteImport.update({
+  id: '/api/sms/inbound',
+  path: '/api/sms/inbound',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiVoiceGatherRoute = ApiVoiceGatherRouteImport.update({
   id: '/api/voice/gather',
   path: '/api/voice/gather',
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
+  '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
   '/api/voice/inbound': typeof ApiVoiceInboundRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
+  '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
   '/api/voice/inbound': typeof ApiVoiceInboundRoute
@@ -426,6 +434,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
+  '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
   '/api/voice/inbound': typeof ApiVoiceInboundRoute
@@ -477,6 +486,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/auth/$'
     | '/api/computer/tick'
+    | '/api/sms/inbound'
     | '/api/voice/gather'
     | '/api/voice/hold'
     | '/api/voice/inbound'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/auth/$'
     | '/api/computer/tick'
+    | '/api/sms/inbound'
     | '/api/voice/gather'
     | '/api/voice/hold'
     | '/api/voice/inbound'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/auth/$'
     | '/api/computer/tick'
+    | '/api/sms/inbound'
     | '/api/voice/gather'
     | '/api/voice/hold'
     | '/api/voice/inbound'
@@ -603,6 +615,7 @@ export interface RootRouteChildren {
   WSlugRoute: typeof WSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiComputerTickRoute: typeof ApiComputerTickRoute
+  ApiSmsInboundRoute: typeof ApiSmsInboundRoute
   ApiVoiceGatherRoute: typeof ApiVoiceGatherRoute
   ApiVoiceHoldRoute: typeof ApiVoiceHoldRoute
   ApiVoiceInboundRoute: typeof ApiVoiceInboundRoute
@@ -867,6 +880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiComputerTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sms/inbound': {
+      id: '/api/sms/inbound'
+      path: '/api/sms/inbound'
+      fullPath: '/api/sms/inbound'
+      preLoaderRoute: typeof ApiSmsInboundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/voice/gather': {
       id: '/api/voice/gather'
       path: '/api/voice/gather'
@@ -1054,6 +1074,7 @@ const rootRouteChildren: RootRouteChildren = {
   WSlugRoute: WSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiComputerTickRoute: ApiComputerTickRoute,
+  ApiSmsInboundRoute: ApiSmsInboundRoute,
   ApiVoiceGatherRoute: ApiVoiceGatherRoute,
   ApiVoiceHoldRoute: ApiVoiceHoldRoute,
   ApiVoiceInboundRoute: ApiVoiceInboundRoute,
