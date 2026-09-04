@@ -1,10 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { randomBytes } from "node:crypto";
 import { makeSignature } from "better-auth/crypto";
-import { publicOrigin } from "@/lib/channels/origin";
 import { SESSION_TOKEN_COOKIE, auth } from "@/lib/auth/server";
 import { platformGoogle } from "@/lib/platform";
 import { getSql } from "@/lib/db";
+
+function requestOrigin(request: Request) {
+  const xf = request.headers.get("x-forwarded-host")?.split(",")[0]?.trim();
+  const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() || "https";
+  if (xf) return `${proto}://${xf}`;
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return "http://127.0.0.1:8080";
+  }
+}
 
 function creds() {
   const g = platformGoogle();
@@ -25,7 +35,7 @@ export const Route = createFileRoute("/api/oauth/google-login")({
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url);
-        const origin = publicOrigin(request);
+        const origin = requestOrigin(request);
         const redirect = `${origin}/api/oauth/google-login`;
         const { clientId, secret } = creds();
         const loginFail = `${origin}/login?google=failed`;

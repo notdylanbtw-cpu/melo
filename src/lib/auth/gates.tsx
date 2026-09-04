@@ -70,7 +70,13 @@ export function SignInButtons() {
       <button
         type="button"
         onClick={() => {
-          window.location.href = "/api/oauth/google-login?next=/app";
+          const host = window.location.hostname;
+          const production = host === "officialmelo.com" || host === "www.officialmelo.com" || host.endsWith(".vercel.app");
+          if (production) {
+            window.location.href = "/api/oauth/google-login?next=/app";
+            return;
+          }
+          void signIn("google", { callbackURL: "/app", errorCallbackURL: "/login?google=failed" });
         }}
         className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-neutral-300 px-4 py-2 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
       >

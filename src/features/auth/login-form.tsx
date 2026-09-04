@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { authClient, authEnabled } from "@/lib/auth/client";
+import { authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { MeloWordmark } from "@/components/brand/melo-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -198,7 +198,17 @@ export function LoginForm({
                     disabled={busy}
                     onClick={() => {
                       const next = mode === "up" && !admin ? "/onboard" : callbackURL;
-                      window.location.href = `/api/oauth/google-login?next=${encodeURIComponent(next)}`;
+                      const host = window.location.hostname;
+                      const production = host === "officialmelo.com" || host === "www.officialmelo.com" || host.endsWith(".vercel.app");
+                      if (production) {
+                        window.location.href = `/api/oauth/google-login?next=${encodeURIComponent(next)}`;
+                        return;
+                      }
+                      setBusy(true);
+                      void signIn("google", { callbackURL: next, errorCallbackURL: "/login?google=failed" }).catch((err) => {
+                        setError(err instanceof Error ? err.message : "Google sign-in failed");
+                        setBusy(false);
+                      });
                     }}
                   >
                     <GoogleMark />
