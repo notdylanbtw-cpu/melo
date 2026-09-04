@@ -202,6 +202,13 @@ export function grokPwaHeadTags(appName = DEFAULT_APP_NAME) {
 
 export const GROK_EXTENSIONS_SCRIPT_SRC = "https://grok.com/grok-app-builder/extensions.js";
 
+/** Public Melo deploys should not show the Grok preview chrome. */
+export function skipGrokPlatformChrome(host = "") {
+  if (String(process.env?.VERCEL ?? "").trim()) return true;
+  const h = String(host).toLowerCase();
+  return h.includes("vercel.app");
+}
+
 export function readGrokProjectId() {
   const fromProcess = typeof process !== "undefined" ? process.env?.VITE_PROJECT_ID : "";
   return String(fromProcess ?? "").trim();
@@ -433,6 +440,14 @@ export function injectGrokPwaHead(html, ctx = {}) {
     documentTitle,
   );
   let next = stripShareMetaTags(html);
+
+  if (skipGrokPlatformChrome(host)) {
+    next = insertAfterHeadOpen(
+      next,
+      grokOgHeadTags({ host, appName, site, documentTitle, cwd }).join(""),
+    );
+    return next;
+  }
 
   const missing = grokPwaHeadTags(appName)
     .filter(([key]) => {
