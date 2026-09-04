@@ -32,7 +32,7 @@ export const APP_LOGO: Record<string, string> = {
   shopify: "/logos/shopify.svg?v=real",
   slack: "/logos/slack.png?v=live",
   zapier: "/logos/zapier.svg?v=real",
-  gbp: "/logos/google.svg?v=real",
+  gbp: "/logos/google.svg?v=g",
 };
 
 export const APP_META: Record<string, AppMeta> = {

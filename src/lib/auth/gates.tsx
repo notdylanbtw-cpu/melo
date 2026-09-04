@@ -4,6 +4,7 @@ import { GROK_PROVIDERS, authEnabled, signIn, signOut, authClient } from "./clie
 import { hasGateSessionMarker } from "./gate-session-marker";
 import { resolveSignInGateState } from "./sign-in-gate";
 import { useCurrentUser, useCurrentUserState } from "./use-current-user";
+import { GoogleMark } from "@/components/brand/google-mark";
 
 const subscribeToNothing = () => () => {};
 const noGateSessionOnServer = () => false;
@@ -68,11 +69,12 @@ export function SignInButtons() {
     <div className="flex w-full max-w-sm flex-col gap-2">
       <button
         type="button"
-        onClick={() =>
-          void authClient.signIn.social({ provider: "google", callbackURL: "/app" })
-        }
-        className="w-full cursor-pointer rounded-md border border-neutral-300 px-4 py-2 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
+        onClick={() => {
+          window.location.href = "/api/oauth/google-login?next=/app";
+        }}
+        className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-neutral-300 px-4 py-2 hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900"
       >
+        <GoogleMark />
         Continue with Google
       </button>
       {GROK_PROVIDERS.map((p) => (

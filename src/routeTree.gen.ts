@@ -47,6 +47,7 @@ import { Route as WSlugRouteImport } from './routes/w.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiComputerTickRouteImport } from './routes/api/computer/tick'
 import { Route as ApiOauthGoogleRouteImport } from './routes/api/oauth/google'
+import { Route as ApiOauthGoogleLoginRouteImport } from './routes/api/oauth/google-login'
 import { Route as ApiOauthMetaRouteImport } from './routes/api/oauth/meta'
 import { Route as ApiSmsInboundRouteImport } from './routes/api/sms/inbound'
 import { Route as ApiVoiceGatherRouteImport } from './routes/api/voice/gather'
@@ -252,6 +253,11 @@ const ApiOauthGoogleRoute = ApiOauthGoogleRouteImport.update({
   path: '/api/oauth/google',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOauthGoogleLoginRoute = ApiOauthGoogleLoginRouteImport.update({
+  id: '/api/oauth/google-login',
+  path: '/api/oauth/google-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiOauthMetaRoute = ApiOauthMetaRouteImport.update({
   id: '/api/oauth/meta',
   path: '/api/oauth/meta',
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
   '/api/oauth/google': typeof ApiOauthGoogleRoute
+  '/api/oauth/google-login': typeof ApiOauthGoogleLoginRoute
   '/api/oauth/meta': typeof ApiOauthMetaRoute
   '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
@@ -413,6 +420,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
   '/api/oauth/google': typeof ApiOauthGoogleRoute
+  '/api/oauth/google-login': typeof ApiOauthGoogleLoginRoute
   '/api/oauth/meta': typeof ApiOauthMetaRoute
   '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
@@ -468,6 +476,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
   '/api/oauth/google': typeof ApiOauthGoogleRoute
+  '/api/oauth/google-login': typeof ApiOauthGoogleLoginRoute
   '/api/oauth/meta': typeof ApiOauthMetaRoute
   '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
@@ -524,6 +533,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/computer/tick'
     | '/api/oauth/google'
+    | '/api/oauth/google-login'
     | '/api/oauth/meta'
     | '/api/sms/inbound'
     | '/api/voice/gather'
@@ -575,6 +585,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/computer/tick'
     | '/api/oauth/google'
+    | '/api/oauth/google-login'
     | '/api/oauth/meta'
     | '/api/sms/inbound'
     | '/api/voice/gather'
@@ -629,6 +640,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/computer/tick'
     | '/api/oauth/google'
+    | '/api/oauth/google-login'
     | '/api/oauth/meta'
     | '/api/sms/inbound'
     | '/api/voice/gather'
@@ -664,6 +676,7 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiComputerTickRoute: typeof ApiComputerTickRoute
   ApiOauthGoogleRoute: typeof ApiOauthGoogleRoute
+  ApiOauthGoogleLoginRoute: typeof ApiOauthGoogleLoginRoute
   ApiOauthMetaRoute: typeof ApiOauthMetaRoute
   ApiSmsInboundRoute: typeof ApiSmsInboundRoute
   ApiVoiceGatherRoute: typeof ApiVoiceGatherRoute
@@ -945,6 +958,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOauthGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/oauth/google-login': {
+      id: '/api/oauth/google-login'
+      path: '/api/oauth/google-login'
+      fullPath: '/api/oauth/google-login'
+      preLoaderRoute: typeof ApiOauthGoogleLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/oauth/meta': {
       id: '/api/oauth/meta'
       path: '/api/oauth/meta'
@@ -1156,6 +1176,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiComputerTickRoute: ApiComputerTickRoute,
   ApiOauthGoogleRoute: ApiOauthGoogleRoute,
+  ApiOauthGoogleLoginRoute: ApiOauthGoogleLoginRoute,
   ApiOauthMetaRoute: ApiOauthMetaRoute,
   ApiSmsInboundRoute: ApiSmsInboundRoute,
   ApiVoiceGatherRoute: ApiVoiceGatherRoute,

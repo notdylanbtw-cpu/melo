@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlanChoice, readChosenPlan, saveChosenPlan } from "@/components/melo/plan-pick";
 import { SupportBot } from "@/components/melo/support-bot";
+import { GoogleMark } from "@/components/brand/google-mark";
 
 export function LoginForm({
   variant,
@@ -21,7 +22,13 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("google") === "setup") return "Google isn’t connected on this office yet. Use email, or add Google under Admin → Platform.";
+    if (q.get("google") === "failed") return "Google sign-in didn’t complete. Try email, or try Google again.";
+    return null;
+  });
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [planId, setPlanId] = useState(readChosenPlan);
@@ -187,16 +194,14 @@ export function LoginForm({
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-12 w-full text-base"
+                    className="h-12 w-full gap-3 text-base"
                     disabled={busy}
                     onClick={() => {
-                      setBusy(true);
-                      void authClient.signIn.social({
-                        provider: "google",
-                        callbackURL: mode === "up" && !admin ? "/onboard" : callbackURL,
-                      });
+                      const next = mode === "up" && !admin ? "/onboard" : callbackURL;
+                      window.location.href = `/api/oauth/google-login?next=${encodeURIComponent(next)}`;
                     }}
                   >
+                    <GoogleMark />
                     Continue with Google
                   </Button>
                 </>
