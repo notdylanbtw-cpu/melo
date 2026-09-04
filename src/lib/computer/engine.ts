@@ -94,6 +94,31 @@ export async function tickOffice(userId: string) {
     did += 1;
   }
 
+  try {
+    const { dueDailySkills } = await import("./skills");
+    const due = await dueDailySkills(userId);
+    for (const skill of due) {
+      try {
+        const { playSteps } = await import("./runtime");
+        await playSteps(userId, skill.steps);
+      } catch {
+        /* browser may be cold */
+      }
+      await logComputer({
+        userId,
+        kind: "skill",
+        agent: "helix",
+        text: `Ran taught task “${skill.name}”`,
+        detail: skill.steps.map((s) => s.label).join(" → "),
+      });
+      const { markSkillRun } = await import("./skills");
+      await markSkillRun(userId, skill.id);
+      did += 1;
+    }
+  } catch {
+    /* skills table may still be migrating */
+  }
+
   const task = ringing[0]
     ? `On a live call · ${ringing[0].from_number}`
     : incoming.length

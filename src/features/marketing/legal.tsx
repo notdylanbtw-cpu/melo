@@ -11,7 +11,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-mkt-fg">The service</h2>
             <p className="mt-2">
-              Melo is software that answers the phone, inbox and related office work as an AI assistant for your business. You stay responsible for the work it does in your name — quotes, bookings, messages and anything it says to a customer.
+              Melo is software that answers the phone, inbox and related office work as an AI assistant for your business. You stay responsible for the work it does in your name — quotes, bookings, messages and anything it says to a customer. The product lives at officialmelo.com.
             </p>
           </section>
           <section>
@@ -29,7 +29,7 @@ export function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-mkt-fg">Fees</h2>
             <p className="mt-2">
-              Prices are in Australian dollars, ex GST, as shown on the Plans page. Voice minutes, seats and automations over the plan cap are billed as add-ons. Cancel anytime; access continues until the end of the paid period.
+              Prices are in Australian dollars, ex GST, as shown on the Plans page. Voice minutes over the plan cap are billed at A$0.55 per minute. The receptionist keeps answering. Seats and automations over the plan cap are billed as add-ons. Cancel anytime; access continues until the end of the paid period.
             </p>
           </section>
           <section>
@@ -40,7 +40,7 @@ export function TermsPage() {
           </section>
           <section>
             <h2 className="text-lg font-semibold text-mkt-fg">Contact</h2>
-            <p className="mt-2">Questions: hello@melo.ai</p>
+            <p className="mt-2">Questions: hello@officialmelo.com</p>
           </section>
         </div>
       </article>
@@ -83,7 +83,7 @@ export function PrivacyPage() {
           <section>
             <h2 className="text-lg font-semibold text-mkt-fg">Your rights</h2>
             <p className="mt-2">
-              Access, correction and deletion under the Australian Privacy Principles. Email hello@melo.ai. If you’re not satisfied, you can contact the OAIC.
+              Access, correction and deletion under the Australian Privacy Principles. Email hello@officialmelo.com. If you’re not satisfied, you can contact the OAIC.
             </p>
           </section>
         </div>

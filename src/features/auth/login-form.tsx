@@ -5,6 +5,7 @@ import { MeloWordmark } from "@/components/brand/melo-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlanChoice, readChosenPlan, saveChosenPlan } from "@/components/melo/plan-pick";
+import { SupportBot } from "@/components/melo/support-bot";
 
 export function LoginForm({
   variant,
@@ -177,6 +178,30 @@ export function LoginForm({
                 </Button>
               </form>
 
+              {mode !== "forgot" ? (
+                <>
+                  <div className="relative my-5">
+                    <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
+                    <span className="relative mx-auto block w-fit bg-canvas px-3 text-xs text-muted-foreground">or</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12 w-full text-base"
+                    disabled={busy}
+                    onClick={() => {
+                      setBusy(true);
+                      void authClient.signIn.social({
+                        provider: "google",
+                        callbackURL: mode === "up" && !admin ? "/onboard" : callbackURL,
+                      });
+                    }}
+                  >
+                    Continue with Google
+                  </Button>
+                </>
+              ) : null}
+
               {mode === "up" && !admin ? (
                 <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
                   By creating an account you agree to the{" "}
@@ -228,6 +253,7 @@ export function LoginForm({
           </p>
         ) : null}
       </main>
+      {admin ? null : <SupportBot tone="light" surface="web" />}
     </div>
   );
 }

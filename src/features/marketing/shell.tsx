@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { MeloWordmark } from "@/components/brand/melo-mark";
+import { SupportBot } from "@/components/melo/support-bot";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import type { ReactNode } from "react";
 
@@ -57,6 +58,15 @@ export function MarketingShell({
           <p className="mt-3 max-w-sm text-pretty leading-relaxed">
             One platform for the office — phone, inbox, quotes, calendar, the firm.
           </p>
+          <p className="mt-2 text-sm">
+            <a href="https://officialmelo.com" className="hover:text-mkt-fg">
+              officialmelo.com
+            </a>
+            <span className="mx-2 text-white/20">·</span>
+            <a href="mailto:hello@officialmelo.com" className="hover:text-mkt-fg">
+              hello@officialmelo.com
+            </a>
+          </p>
           <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <FooterCol
               title="Platform"
@@ -84,6 +94,7 @@ export function MarketingShell({
               title="Use case"
               links={[
                 ["Answer 24/7", "/", "how"],
+                ["Melo Computer", "/", "how"],
                 ["Book the job", "/", "how"],
                 ["Send a quote", "/", "pricing"],
                 ["Follow up", "/", "how"],
@@ -106,6 +117,7 @@ export function MarketingShell({
           <p className="mt-14 text-xs">© {new Date().getFullYear()} Melo. All rights reserved.</p>
         </div>
       </footer>
+      <SupportBot tone="dark" surface="web" />
     </div>
   );
 }

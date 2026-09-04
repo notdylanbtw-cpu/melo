@@ -24,6 +24,7 @@ import { Route as Verify2faRouteImport } from './routes/verify-2fa'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminContentRouteImport } from './routes/admin/content'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminPlatformRouteImport } from './routes/admin/platform'
 import { Route as AdminSubsRouteImport } from './routes/admin/subs'
 import { Route as AdminTicketsRouteImport } from './routes/admin/tickets'
 import { Route as AppIndexRouteImport } from './routes/app/index'
@@ -45,6 +46,8 @@ import { Route as SignQuoteIdRouteImport } from './routes/sign.$quoteId'
 import { Route as WSlugRouteImport } from './routes/w.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiComputerTickRouteImport } from './routes/api/computer/tick'
+import { Route as ApiOauthGoogleRouteImport } from './routes/api/oauth/google'
+import { Route as ApiOauthMetaRouteImport } from './routes/api/oauth/meta'
 import { Route as ApiSmsInboundRouteImport } from './routes/api/sms/inbound'
 import { Route as ApiVoiceGatherRouteImport } from './routes/api/voice/gather'
 import { Route as ApiVoiceHoldRouteImport } from './routes/api/voice/hold'
@@ -53,6 +56,7 @@ import { Route as ApiVoiceSampleRouteImport } from './routes/api/voice/sample'
 import { Route as ApiVoiceStatusRouteImport } from './routes/api/voice/status'
 import { Route as ApiVoiceTransferRouteImport } from './routes/api/voice/transfer'
 import { Route as ApiWebhooksMetaRouteImport } from './routes/api/webhooks/meta'
+import { Route as ApiWebhooksStripeRouteImport } from './routes/api/webhooks/stripe'
 import { Route as ApiWidgetSlugRouteImport } from './routes/api/widget/$slug'
 import { Route as AppPipelineInvoicesRouteImport } from './routes/app/pipeline.invoices'
 import { Route as AppReceptionIndexRouteImport } from './routes/app/reception.index'
@@ -131,6 +135,11 @@ const AdminContentRoute = AdminContentRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPlatformRoute = AdminPlatformRouteImport.update({
+  id: '/platform',
+  path: '/platform',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSubsRoute = AdminSubsRouteImport.update({
@@ -238,6 +247,16 @@ const ApiComputerTickRoute = ApiComputerTickRouteImport.update({
   path: '/api/computer/tick',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOauthGoogleRoute = ApiOauthGoogleRouteImport.update({
+  id: '/api/oauth/google',
+  path: '/api/oauth/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOauthMetaRoute = ApiOauthMetaRouteImport.update({
+  id: '/api/oauth/meta',
+  path: '/api/oauth/meta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiSmsInboundRoute = ApiSmsInboundRouteImport.update({
   id: '/api/sms/inbound',
   path: '/api/sms/inbound',
@@ -278,6 +297,11 @@ const ApiWebhooksMetaRoute = ApiWebhooksMetaRouteImport.update({
   path: '/api/webhooks/meta',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksStripeRoute = ApiWebhooksStripeRouteImport.update({
+  id: '/api/webhooks/stripe',
+  path: '/api/webhooks/stripe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiWidgetSlugRoute = ApiWidgetSlugRouteImport.update({
   id: '/api/widget/$slug',
   path: '/api/widget/$slug',
@@ -314,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/verify-2fa': typeof Verify2faRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/platform': typeof AdminPlatformRoute
   '/admin/subs': typeof AdminSubsRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/app/calendar': typeof AppCalendarRoute
@@ -336,6 +361,8 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
+  '/api/oauth/google': typeof ApiOauthGoogleRoute
+  '/api/oauth/meta': typeof ApiOauthMetaRoute
   '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
@@ -344,6 +371,7 @@ export interface FileRoutesByFullPath {
   '/api/voice/status': typeof ApiVoiceStatusRoute
   '/api/voice/transfer': typeof ApiVoiceTransferRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/api/widget/$slug': typeof ApiWidgetSlugRoute
   '/app/pipeline/invoices': typeof AppPipelineInvoicesRoute
   '/app/reception/calls': typeof AppReceptionCallsRoute
@@ -362,6 +390,7 @@ export interface FileRoutesByTo {
   '/verify-2fa': typeof Verify2faRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/platform': typeof AdminPlatformRoute
   '/admin/subs': typeof AdminSubsRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/app/calendar': typeof AppCalendarRoute
@@ -383,6 +412,8 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
+  '/api/oauth/google': typeof ApiOauthGoogleRoute
+  '/api/oauth/meta': typeof ApiOauthMetaRoute
   '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
@@ -391,6 +422,7 @@ export interface FileRoutesByTo {
   '/api/voice/status': typeof ApiVoiceStatusRoute
   '/api/voice/transfer': typeof ApiVoiceTransferRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/api/widget/$slug': typeof ApiWidgetSlugRoute
   '/app/pipeline/invoices': typeof AppPipelineInvoicesRoute
   '/app/reception/calls': typeof AppReceptionCallsRoute
@@ -412,6 +444,7 @@ export interface FileRoutesById {
   '/verify-2fa': typeof Verify2faRoute
   '/admin/content': typeof AdminContentRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/platform': typeof AdminPlatformRoute
   '/admin/subs': typeof AdminSubsRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/app/calendar': typeof AppCalendarRoute
@@ -434,6 +467,8 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/computer/tick': typeof ApiComputerTickRoute
+  '/api/oauth/google': typeof ApiOauthGoogleRoute
+  '/api/oauth/meta': typeof ApiOauthMetaRoute
   '/api/sms/inbound': typeof ApiSmsInboundRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
@@ -442,6 +477,7 @@ export interface FileRoutesById {
   '/api/voice/status': typeof ApiVoiceStatusRoute
   '/api/voice/transfer': typeof ApiVoiceTransferRoute
   '/api/webhooks/meta': typeof ApiWebhooksMetaRoute
+  '/api/webhooks/stripe': typeof ApiWebhooksStripeRoute
   '/api/widget/$slug': typeof ApiWidgetSlugRoute
   '/app/pipeline/invoices': typeof AppPipelineInvoicesRoute
   '/app/reception/calls': typeof AppReceptionCallsRoute
@@ -464,6 +500,7 @@ export interface FileRouteTypes {
     | '/verify-2fa'
     | '/admin/content'
     | '/admin/login'
+    | '/admin/platform'
     | '/admin/subs'
     | '/admin/tickets'
     | '/app/calendar'
@@ -486,6 +523,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/auth/$'
     | '/api/computer/tick'
+    | '/api/oauth/google'
+    | '/api/oauth/meta'
     | '/api/sms/inbound'
     | '/api/voice/gather'
     | '/api/voice/hold'
@@ -494,6 +533,7 @@ export interface FileRouteTypes {
     | '/api/voice/status'
     | '/api/voice/transfer'
     | '/api/webhooks/meta'
+    | '/api/webhooks/stripe'
     | '/api/widget/$slug'
     | '/app/pipeline/invoices'
     | '/app/reception/calls'
@@ -512,6 +552,7 @@ export interface FileRouteTypes {
     | '/verify-2fa'
     | '/admin/content'
     | '/admin/login'
+    | '/admin/platform'
     | '/admin/subs'
     | '/admin/tickets'
     | '/app/calendar'
@@ -533,6 +574,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/auth/$'
     | '/api/computer/tick'
+    | '/api/oauth/google'
+    | '/api/oauth/meta'
     | '/api/sms/inbound'
     | '/api/voice/gather'
     | '/api/voice/hold'
@@ -541,6 +584,7 @@ export interface FileRouteTypes {
     | '/api/voice/status'
     | '/api/voice/transfer'
     | '/api/webhooks/meta'
+    | '/api/webhooks/stripe'
     | '/api/widget/$slug'
     | '/app/pipeline/invoices'
     | '/app/reception/calls'
@@ -561,6 +605,7 @@ export interface FileRouteTypes {
     | '/verify-2fa'
     | '/admin/content'
     | '/admin/login'
+    | '/admin/platform'
     | '/admin/subs'
     | '/admin/tickets'
     | '/app/calendar'
@@ -583,6 +628,8 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/auth/$'
     | '/api/computer/tick'
+    | '/api/oauth/google'
+    | '/api/oauth/meta'
     | '/api/sms/inbound'
     | '/api/voice/gather'
     | '/api/voice/hold'
@@ -591,6 +638,7 @@ export interface FileRouteTypes {
     | '/api/voice/status'
     | '/api/voice/transfer'
     | '/api/webhooks/meta'
+    | '/api/webhooks/stripe'
     | '/api/widget/$slug'
     | '/app/pipeline/invoices'
     | '/app/reception/calls'
@@ -615,6 +663,8 @@ export interface RootRouteChildren {
   WSlugRoute: typeof WSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiComputerTickRoute: typeof ApiComputerTickRoute
+  ApiOauthGoogleRoute: typeof ApiOauthGoogleRoute
+  ApiOauthMetaRoute: typeof ApiOauthMetaRoute
   ApiSmsInboundRoute: typeof ApiSmsInboundRoute
   ApiVoiceGatherRoute: typeof ApiVoiceGatherRoute
   ApiVoiceHoldRoute: typeof ApiVoiceHoldRoute
@@ -623,6 +673,7 @@ export interface RootRouteChildren {
   ApiVoiceStatusRoute: typeof ApiVoiceStatusRoute
   ApiVoiceTransferRoute: typeof ApiVoiceTransferRoute
   ApiWebhooksMetaRoute: typeof ApiWebhooksMetaRoute
+  ApiWebhooksStripeRoute: typeof ApiWebhooksStripeRoute
   ApiWidgetSlugRoute: typeof ApiWidgetSlugRoute
 }
 
@@ -731,6 +782,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/platform': {
+      id: '/admin/platform'
+      path: '/platform'
+      fullPath: '/admin/platform'
+      preLoaderRoute: typeof AdminPlatformRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/subs': {
@@ -880,6 +938,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiComputerTickRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/oauth/google': {
+      id: '/api/oauth/google'
+      path: '/api/oauth/google'
+      fullPath: '/api/oauth/google'
+      preLoaderRoute: typeof ApiOauthGoogleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/oauth/meta': {
+      id: '/api/oauth/meta'
+      path: '/api/oauth/meta'
+      fullPath: '/api/oauth/meta'
+      preLoaderRoute: typeof ApiOauthMetaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/sms/inbound': {
       id: '/api/sms/inbound'
       path: '/api/sms/inbound'
@@ -936,6 +1008,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhooksMetaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/stripe': {
+      id: '/api/webhooks/stripe'
+      path: '/api/webhooks/stripe'
+      fullPath: '/api/webhooks/stripe'
+      preLoaderRoute: typeof ApiWebhooksStripeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/widget/$slug': {
       id: '/api/widget/$slug'
       path: '/api/widget/$slug'
@@ -970,6 +1049,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminContentRoute: typeof AdminContentRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminPlatformRoute: typeof AdminPlatformRoute
   AdminSubsRoute: typeof AdminSubsRoute
   AdminTicketsRoute: typeof AdminTicketsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -978,6 +1058,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminContentRoute: AdminContentRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminPlatformRoute: AdminPlatformRoute,
   AdminSubsRoute: AdminSubsRoute,
   AdminTicketsRoute: AdminTicketsRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -1074,6 +1155,8 @@ const rootRouteChildren: RootRouteChildren = {
   WSlugRoute: WSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiComputerTickRoute: ApiComputerTickRoute,
+  ApiOauthGoogleRoute: ApiOauthGoogleRoute,
+  ApiOauthMetaRoute: ApiOauthMetaRoute,
   ApiSmsInboundRoute: ApiSmsInboundRoute,
   ApiVoiceGatherRoute: ApiVoiceGatherRoute,
   ApiVoiceHoldRoute: ApiVoiceHoldRoute,
@@ -1082,6 +1165,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiVoiceStatusRoute: ApiVoiceStatusRoute,
   ApiVoiceTransferRoute: ApiVoiceTransferRoute,
   ApiWebhooksMetaRoute: ApiWebhooksMetaRoute,
+  ApiWebhooksStripeRoute: ApiWebhooksStripeRoute,
   ApiWidgetSlugRoute: ApiWidgetSlugRoute,
 }
 export const routeTree = rootRouteImport

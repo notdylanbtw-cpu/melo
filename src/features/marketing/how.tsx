@@ -5,7 +5,7 @@ const STEPS = [
   {
     n: "01",
     t: "Train it on the business",
-    d: "Paste the website, hours, suburbs and the work you do. Melo studies it so callers hear you — not a generic bot.",
+    d: "Paste the website, hours, suburbs and the work you do. Melo studies it so callers hear you.",
   },
   {
     n: "02",
@@ -22,6 +22,11 @@ const STEPS = [
     t: "Run the office from anywhere",
     d: "Quotes, calendar, the firm. Same login on the web. Seven days on Pro to try it with your number.",
   },
+  {
+    n: "05",
+    t: "Melo Computer stays on",
+    d: "Melo has its own machine. Phone, inbox and the tasks you taught keep running 24/7 — even if you close the tab.",
+  },
 ];
 
 export function HowPage() {
@@ -29,8 +34,8 @@ export function HowPage() {
     <MarketingShell atmosphere>
       <div className="mx-auto max-w-[800px] px-6 py-16">
         <p className="text-sm font-medium text-mkt-muted">How it works</p>
-        <h1 className="mt-2 text-4xl font-bold tracking-[-0.03em] sm:text-5xl">Four things. Then the office is covered.</h1>
-        <p className="mt-4 max-w-lg text-mkt-muted">Phone, jobs, quotes, calendar, the firm. One login. You train it once.</p>
+        <h1 className="mt-2 text-4xl font-bold tracking-[-0.03em] sm:text-5xl">Five things. Then the office is covered.</h1>
+        <p className="mt-4 max-w-lg text-mkt-muted">Phone, jobs, quotes, calendar, the firm — on Melo’s computer, 24/7. You train it once.</p>
         <ol className="mt-14 space-y-8">
           {STEPS.map((s) => (
             <li key={s.n} className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:grid sm:grid-cols-[72px_minmax(0,1fr)] sm:gap-4 sm:p-8">

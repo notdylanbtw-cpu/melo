@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
-import { Separator } from "@/components/ui/misc";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -253,7 +252,6 @@ function WorkspacePane() {
   const ws = useMelo((s) => s.workspace);
   const update = useMelo((s) => s.updateWorkspace);
   const setIndustry = useMelo((s) => s.setIndustry);
-  const reset = useMelo((s) => s.resetDemo);
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <div>
@@ -294,10 +292,6 @@ function WorkspacePane() {
           <Input value={ws.address} onChange={(e) => update({ address: e.target.value })} />
         </Field>
       </div>
-      <Separator />
-      <Button variant="outline" onClick={reset}>
-        Reset demo data
-      </Button>
     </div>
   );
 }
@@ -567,7 +561,7 @@ function VoicePane() {
     <div className="mx-auto max-w-xl space-y-4">
       <h1 className="text-xl font-semibold">Receptionist voice</h1>
       <p className="text-sm text-muted-foreground">
-        Melo hosts the voice. Isla is the Australian receptionist. Included in every plan — you don’t need ElevenLabs.
+        Melo hosts the voice. Mia is the default — bright Australian. Included in every plan.
       </p>
       <p className="rounded-lg border border-border bg-muted px-3 py-2 text-sm">Hosted by Melo · ElevenLabs on our account</p>
       <Field label="Locale">
@@ -579,9 +573,10 @@ function VoicePane() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Isla">Isla · Emma, Australian</SelectItem>
-            <SelectItem value="Matilda">Matilda · Sarah</SelectItem>
-            <SelectItem value="Jack">Jack · Charlie, Australian</SelectItem>
+            <SelectItem value="Mia">Mia · bright Australian</SelectItem>
+            <SelectItem value="Jordan">Jordan · Australian male</SelectItem>
+            <SelectItem value="Ava">Ava · eager, helpful</SelectItem>
+            <SelectItem value="Mac">Mac · male</SelectItem>
           </SelectContent>
         </Select>
       </Field>

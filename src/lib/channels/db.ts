@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { hydrateTwilio, type TwilioCreds } from "@/lib/voice/twilio";
 import { platformTwilio } from "@/lib/platform";
 
-export type ChannelKind = "voice" | "whatsapp" | "messenger" | "facebook" | "instagram" | "imessage" | "widget";
+export type ChannelKind = string;
 
 export type ChannelAccount = {
   id: string;

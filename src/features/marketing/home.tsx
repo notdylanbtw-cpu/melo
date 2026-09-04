@@ -6,7 +6,7 @@ import { MarketingShell } from "./shell";
 import { LandingBody } from "./sections";
 import { OfficeShot } from "./office-shot";
 
-const SAMPLE_SRC = "/sample-isla.mp3?v=welcome";
+const SAMPLE_SRC = "/samples/mia.mp3";
 
 let current: HTMLAudioElement | null;
 
@@ -63,7 +63,7 @@ export function MarketingHome() {
               Cancel the rest.
             </h1>
             <p className="mt-6 max-w-[28rem] text-[1.05rem] leading-relaxed text-mkt-muted">
-              Phone, inbox, quotes, calendar, the firm — one platform.
+              Phone, inbox, quotes, calendar, the firm — on Melo’s computer, 24/7.
               <br />
               Keep Xero, WhatsApp, the calendar. Cancel the rest.
             </p>
@@ -106,7 +106,7 @@ export function MarketingHome() {
       <section className="mx-auto max-w-[1120px] px-6 pb-16 pt-4">
         <dl className="grid grid-cols-2 gap-8 border-t border-white/10 pt-10 sm:grid-cols-4">
           {[
-            ["24/7", "The phone. After hours too."],
+            ["24/7", "Melo Computer. Always on."],
             ["One inbox", "Calls, WhatsApp, Instagram, web."],
             ["Signed", "Quote in the thread. That’s the job."],
             ["One login", "Calendar, firm, invoices, reach."],

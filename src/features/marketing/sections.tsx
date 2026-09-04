@@ -5,6 +5,7 @@ import { COMPARE_GROUPS, PLAN_COMPARE, PLANS, TRIAL_DAYS, type CompareCell } fro
 import { money } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState, Fragment } from "react";
+import { ComputerShot } from "./computer-shot";
 
 export function LandingBody() {
   return (
@@ -22,6 +23,9 @@ export function LandingBody() {
       </Reveal>
       <Reveal>
         <HowBlock />
+      </Reveal>
+      <Reveal>
+        <ComputerBlock />
       </Reveal>
       <Reveal>
         <IntegrationsBlock />
@@ -89,9 +93,9 @@ const WHO = [
     role: "Call-outs",
     d: "Call-outs and switchboard quotes.",
     say: "Brightspark Electrical. I can book a call-out or take a quote.",
-    audio: "/mkt-who-electrician.mp3?v=jordan",
+    audio: "/mkt-who-electrician.mp3?v=mac",
     orb: "/mkt-orb-electrician.jpg",
-    voice: "Jordan",
+    voice: "Mac",
   },
   {
     t: "Dentist",
@@ -99,9 +103,9 @@ const WHO = [
     role: "Clinic",
     d: "New patients, hygiene, after-hours pain.",
     say: "Brightside Dental. I can book a consult, or take a message.",
-    audio: "/mkt-who-dentist.mp3",
+    audio: "/mkt-who-dentist.mp3?v=mia",
     orb: "/mkt-orb-dentist.jpg",
-    voice: "Emma",
+    voice: "Mia",
   },
   {
     t: "Salon",
@@ -109,9 +113,9 @@ const WHO = [
     role: "Front of house",
     d: "Colour consults, no-shows, DMs.",
     say: "Atelier. Colour consult or a cut — I can hold a chair.",
-    audio: "/mkt-who-salon.mp3",
+    audio: "/mkt-who-salon.mp3?v=ava",
     orb: "/mkt-orb-salon.jpg",
-    voice: "Emma",
+    voice: "Ava",
   },
   {
     t: "Cafe / venue",
@@ -119,9 +123,9 @@ const WHO = [
     role: "Bookings",
     d: "Functions, suppliers, service.",
     say: "Harbour Room. For bookings say the date. Suppliers, leave a name.",
-    audio: "/mkt-who-cafe.mp3",
+    audio: "/mkt-who-cafe.mp3?v=mia",
     orb: "/mkt-orb-cafe.jpg",
-    voice: "Emma",
+    voice: "Mia",
   },
   {
     t: "Builder",
@@ -139,9 +143,9 @@ const WHO = [
     role: "Chambers",
     d: "New matters, existing files, the right person.",
     say: "Blackwell Law. New matter or an existing file — I’ll take your name and get it to the right person.",
-    audio: "/mkt-who-lawyer.mp3",
+    audio: "/mkt-who-lawyer.mp3?v=ava",
     orb: "/mkt-orb-lawyer.jpg",
-    voice: "Emma",
+    voice: "Ava",
   },
 ] as const;
 
@@ -219,7 +223,7 @@ function WhoBlock() {
     <section id="who" className="scroll-mt-24 mx-auto max-w-[1120px] px-6 py-24">
       <h2 className="text-center text-4xl font-bold tracking-[-0.035em] sm:text-5xl">Hear it as your business.</h2>
       <p className="mx-auto mt-3 max-w-md text-center text-[1.05rem] leading-relaxed text-ink/55">
-        Jordan or Emma answers as that shop — not a generic bot.
+        Mia, Jordan, Ava or Mac answers as that shop.
       </p>
 
       <div className="relative mt-10">
@@ -615,7 +619,7 @@ function AskDemoBlock() {
   );
 }
 
-function HowIcon({ kind }: { kind: "train" | "phone" | "site" | "inbox" | "quote" | "firm" }) {
+function HowIcon({ kind }: { kind: "train" | "phone" | "site" | "inbox" | "quote" | "firm" | "comp" }) {
   const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   return (
     <svg viewBox="0 0 32 32" className="size-10 text-[#5ba3ff]" aria-hidden>
@@ -661,6 +665,12 @@ function HowIcon({ kind }: { kind: "train" | "phone" | "site" | "inbox" | "quote
           <rect x="16" y="16" width="8" height="8" rx="1.5" fill="currentColor" opacity="0.85" />
         </>
       ) : null}
+      {kind === "comp" ? (
+        <>
+          <rect x="4" y="6" width="24" height="16" rx="2" {...stroke} />
+          <path d="M10 26h12M16 22v4" {...stroke} />
+        </>
+      ) : null}
     </svg>
   );
 }
@@ -673,6 +683,7 @@ function HowBlock() {
     { k: "inbox" as const, t: "One inbox", d: "Calls, WhatsApp, Instagram, the web — one thread, one reply." },
     { k: "quote" as const, t: "Quote and sign", d: "Priced from your book, emailed, e-signed. That’s the job approved." },
     { k: "firm" as const, t: "Run the firm", d: "AI agents on calendar, quotes and follow-up. Same login." },
+    { k: "comp" as const, t: "Melo Computer", d: "Stays on 24/7. Phone, inbox, the tasks you taught — even if you close the tab." },
   ];
   return (
     <section id="how" className="relative scroll-mt-24 overflow-hidden bg-mkt py-28 text-mkt-fg">
@@ -769,14 +780,48 @@ export function PricingGrid({ compact, light }: { compact?: boolean; light?: boo
   );
 }
 
+function ComputerBlock() {
+  const items = [
+    { t: "Always on", d: "Not your laptop. A machine in the cloud that doesn’t go home, take lunch, or close the tab." },
+    { t: "Its own browser", d: "Logged into Jobber, Xero, Gmail — on Melo’s computer. Teach a task once. Melo runs it again." },
+    { t: "Phone never waits", d: "Calls hit this machine directly. Inbox, quotes, taught work — 24/7, even after you log out." },
+  ];
+  return (
+    <section className="bg-mkt py-28 text-mkt-fg">
+      <div className="mx-auto max-w-[1120px] px-6">
+        <p className="text-sm font-medium text-mkt-muted">Melo Computer</p>
+        <h2 className="mt-3 max-w-3xl text-4xl font-bold tracking-[-0.035em] sm:text-5xl sm:leading-[1.05]">
+          Melo has a computer.
+          <br />
+          It works 24/7.
+        </h2>
+        <p className="mt-5 max-w-lg text-[1.05rem] leading-relaxed text-mkt-muted">
+          Close the app. Go home. The receptionist still answers. The inbox still files. The jobs you taught still run — on Melo’s machine, not yours.
+        </p>
+        <div className="mt-12">
+          <ComputerShot />
+        </div>
+        <ul className="mt-16 grid gap-10 sm:grid-cols-3">
+          {items.map((s) => (
+            <li key={s.t}>
+              <h3 className="text-xl font-semibold tracking-tight">{s.t}</h3>
+              <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-mkt-muted">{s.d}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
 function IntegrationsBlock() {
   const rowA = [
     { name: "WhatsApp", src: "/logos/whatsapp.svg?v=real" },
     { name: "Instagram", src: "/logos/instagram.svg?v=real" },
-    { name: "Messenger", src: "/logos/messenger.svg?v=real" },
+    { name: "Messenger", src: "/logos/messenger.png?v=live" },
     { name: "Facebook", src: "/logos/facebook.svg?v=real" },
-    { name: "Twilio", src: "/logos/twilio.svg?v=real" },
-    { name: "Slack", src: "/logos/slack.svg?v=real" },
+    { name: "Twilio", src: "/logos/twilio.png?v=live" },
+    { name: "Slack", src: "/logos/slack.png?v=live" },
     { name: "Gmail", src: "/logos/gmail.svg?v=real" },
     { name: "Stripe", src: "/logos/stripe.svg?v=real" },
     { name: "Xero", src: "/logos/xero.svg?v=real" },
@@ -793,11 +838,11 @@ function IntegrationsBlock() {
     { name: "Salesforce", src: "/logos/salesforce.svg?v=real" },
     { name: "QuickBooks", src: "/logos/quickbooks.svg?v=real" },
     { name: "MYOB", src: "/logos/myob.svg?v=real" },
-    { name: "ServiceM8", src: "/logos/servicem8.svg?v=real" },
-    { name: "Jobber", src: "/logos/jobber.svg?v=real" },
-    { name: "Fergus", src: "/logos/fergus.svg?v=real" },
-    { name: "Simpro", src: "/logos/simpro.svg?v=real" },
-    { name: "Pipedrive", src: "/logos/pipedrive.svg?v=real" },
+    { name: "ServiceM8", src: "/logos/servicem8.png?v=live" },
+    { name: "Jobber", src: "/logos/jobber.svg?v=badge" },
+    { name: "Fergus", src: "/logos/fergus.png?v=live" },
+    { name: "Simpro", src: "/logos/simpro.png?v=live" },
+    { name: "Pipedrive", src: "/logos/pipedrive.png?v=live" },
   ];
   return (
     <section className="overflow-hidden bg-[#f4f4f2] py-24 text-ink">
@@ -835,14 +880,14 @@ function Escalator({ items, reverse }: { items: { name: string; src: string }[];
 
 function VersusBlock() {
   const rows = [
-    { label: "Monthly cost", service: "$2,000+ to take messages", human: "$70k+ per person, plus super", melo: "From $179. Flat." },
-    { label: "Hours", service: "Business hours only", human: "Shifts, leave, lunch", melo: "24/7/365" },
-    { label: "Who answers", service: "A script. One at a time.", human: "One person. They get sick.", melo: "The firm — receptionist plus agents" },
-    { label: "Quotes", service: "They don’t send them", human: "Another app, when they remember", melo: "Priced, emailed, e-signed" },
-    { label: "Jobs", service: "A message in your inbox", human: "A spreadsheet they keep", melo: "Pipeline, calendar, the lot" },
-    { label: "At once", service: "Queue. Hold music.", human: "One caller. Everyone else waits.", melo: "Unlimited. No queue." },
-    { label: "Setup", service: "Days to weeks", human: "Weeks to hire and train", melo: "Live the same day" },
-    { label: "When they leave", service: "You keep paying", human: "The knowledge walks out", melo: "Trained on your site. Stays." },
+    { label: "Monthly cost", human: "$70k+ per person, plus super", melo: "From $249. Flat." },
+    { label: "Hours", human: "Shifts, leave, lunch", melo: "Melo Computer. 24/7." },
+    { label: "Who answers", human: "One person. They get sick.", melo: "The firm — receptionist plus agents" },
+    { label: "Quotes", human: "Another app, when they remember", melo: "Priced, emailed, e-signed" },
+    { label: "Jobs", human: "A spreadsheet they keep", melo: "Pipeline, calendar, the lot" },
+    { label: "At once", human: "One caller. Everyone else waits.", melo: "Unlimited. No queue." },
+    { label: "Setup", human: "Weeks to hire and train", melo: "Live the same day" },
+    { label: "When they leave", human: "The knowledge walks out", melo: "Trained on your site. Stays." },
   ];
   const last = rows.length - 1;
   return (
@@ -853,13 +898,12 @@ function VersusBlock() {
         choose Melo
       </h2>
       <p className="mt-3 max-w-lg text-[1.05rem] text-ink/55">
-        Answering service. Human agents. An AI firm. See how we stack up — no fine print.
+        Human agents vs an AI firm. See how we stack up — no fine print.
       </p>
       <div className="mt-10 overflow-x-auto">
-        <div className="min-w-[820px] overflow-hidden rounded-[28px] bg-[#f2f2f0]">
-          <div className="grid grid-cols-[minmax(132px,0.85fr)_1fr_1fr_1.2fr]">
+        <div className="min-w-[640px] overflow-hidden rounded-[28px] bg-[#f2f2f0]">
+          <div className="grid grid-cols-[minmax(132px,0.85fr)_1fr_1.2fr]">
             <div className="p-6" />
-            <div className="p-6 text-[17px] font-semibold leading-tight">Traditional answering</div>
             <div className="p-6 text-[17px] font-semibold leading-tight">Human agents</div>
             <div className="flex items-center gap-2 rounded-t-[22px] bg-ink p-6 text-[17px] font-semibold text-white">
               <MeloMark className="size-6" />
@@ -868,7 +912,6 @@ function VersusBlock() {
             {rows.map((r, i) => (
               <Fragment key={r.label}>
                 <div className="border-t border-black/8 px-6 py-5 text-sm font-medium">{r.label}</div>
-                <VersusBad text={r.service} />
                 <VersusBad text={r.human} />
                 <div
                   className={cn(
@@ -972,6 +1015,7 @@ export function CompareTable({ light }: { light?: boolean }) {
 
 function FaqBlock() {
   const faqs = [
+    ["Does Melo run if I close the app?", "Yes. Melo has its own computer. Phone, inbox and taught tasks keep going 24/7 — not on your laptop."],
     ["Do I need a new number?", "No. Point the number you already have at Melo, or we’ll issue one."],
     ["Does it work on my website?", "Yes. Paste a snippet, or send your contact form to Melo. Enquiries land in Inbox."],
     ["What if I want to take the call?", "Transfer. Melo dials your mobile. You can barge in from Reception."],
@@ -1012,7 +1056,7 @@ function JoinBlock() {
             The whole office.
           </h2>
           <p className="mt-4 max-w-md text-[1.05rem] leading-relaxed text-mkt-muted">
-            Phone, jobs, quotes, calendar, AI agents. Plug in Xero, WhatsApp, the tools you keep — cancel the rest.
+            Phone, jobs, quotes, calendar, AI agents — on Melo’s computer, 24/7. Plug in Xero, WhatsApp, the tools you keep — cancel the rest.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/signup" className="mkt-pill-cream inline-flex h-12 items-center px-7 text-[15px] font-semibold">

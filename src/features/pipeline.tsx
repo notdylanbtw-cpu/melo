@@ -3,7 +3,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, CalendarDays, MapPin, Phone } from "lucide-react";
 import { ChannelChip } from "@/components/melo/channel";
 import { InvoiceSheet, OwnerMargin, QuoteSheet } from "@/components/melo/quote-sheet";
-import { SendInvoiceDialog } from "@/components/melo/send-invoice";
+import { SendInvoiceDialog, SendInvoicePanel } from "@/components/melo/send-invoice";
 import { STAGE_LABEL, StagePill } from "@/components/melo/status";
 import { InvoicesPage } from "@/features/invoices";
 import { Button } from "@/components/ui/button";
@@ -513,21 +513,13 @@ function JobRecord({ job, onBack }: { job: Job; onBack: () => void }) {
               ) : (
                 <div className="space-y-4">
                   {job.invoices.map((inv) => (
-                    <div key={inv.id} className="space-y-2">
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() =>
-                            setSendInv({
-                              id: inv.id,
-                              intent: inv.status === "sent" || inv.status === "viewed" || inv.status === "overdue" ? "reminder" : "send",
-                            })
-                          }
-                        >
-                          {inv.status === "draft" || inv.status === "awaiting_approval" ? `Send ${inv.number}` : `Remind · ${inv.number}`}
-                        </Button>
-                      </div>
+                    <div key={inv.id} className="space-y-3">
                       <InvoiceSheet invoice={inv} job={job} customer={customer} workspace={workspace} />
+                      <SendInvoicePanel
+                        jobId={job.id}
+                        invoiceId={inv.id}
+                        intent={inv.status === "sent" || inv.status === "viewed" || inv.status === "overdue" ? "reminder" : "send"}
+                      />
                     </div>
                   ))}
                 </div>

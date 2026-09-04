@@ -219,6 +219,148 @@ export function SendInvoiceDialog({
   );
 }
 
+export function SendInvoicePanel({
+  jobId,
+  invoiceId,
+  intent = "send",
+  onSent,
+}: {
+  jobId: string;
+  invoiceId: string;
+  intent?: "send" | "reminder";
+  onSent?: () => void;
+}) {
+  const jobs = useMelo((s) => s.jobs);
+  const customers = useMelo((s) => s.customers);
+  const workspace = useMelo((s) => s.workspace);
+  const templates = useMelo((s) => s.invoiceTemplates);
+  const send = useMelo((s) => s.sendInvoice);
+  const job = jobs.find((j) => j.id === jobId);
+  const invoice = job?.invoices.find((i) => i.id === invoiceId);
+  const customer = job ? customers.find((c) => c.id === job.customerId) : undefined;
+  const defaultChannel: "email" | "sms" | "whatsapp" =
+    job?.channel === "sms" || job?.channel === "whatsapp" || job?.channel === "email" ? job.channel : "email";
+  const [channel, setChannel] = useState<"email" | "sms" | "whatsapp">(defaultChannel);
+  const [templateId, setTemplateId] = useState("");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const paid = job && invoice ? job.payments.filter((p) => p.invoiceId === invoice.id).reduce((n, p) => n + p.amount, 0) : 0;
+  const ctx = useMemo(() => {
+    if (!job || !invoice || !customer) return null;
+    return invoiceContext({ invoice, job, customer, workspace, paid });
+  }, [job, invoice, customer, workspace, paid]);
+
+  useEffect(() => {
+    if (!invoice || !ctx) return;
+    const tpl = pickTemplate(templates, invoice, defaultChannel, intent);
+    setChannel(defaultChannel);
+    setTemplateId(tpl?.id ?? templates[0]?.id ?? "");
+    if (tpl) {
+      setSubject(fillTemplate(tpl.subject, ctx));
+      setBody(fillTemplate(tpl.body, ctx));
+    }
+  }, [invoice?.id, intent]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!job || !invoice || !customer || !ctx) return null;
+  if (invoice.status === "paid" || invoice.status === "void") return null;
+
+  const matching = templates.filter((tpl) => tpl.channel === (channel === "email" ? "email" : "sms"));
+  const to = channel === "email" ? customer.email : customer.phone;
+  const canSend = sendable(invoice.status) && body.trim().length > 0;
+
+  function applyTemplate(id: string, ch: Channel) {
+    const tpl = templates.find((t) => t.id === id) ?? pickTemplate(templates, invoice!, ch, intent);
+    if (!tpl || !ctx) return;
+    setTemplateId(tpl.id);
+    setSubject(fillTemplate(tpl.subject, ctx));
+    setBody(fillTemplate(tpl.body, ctx));
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-canvas p-5">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h3 className="text-base font-semibold">Send an invoice</h3>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {invoice.number} to {customer.name} · {ctx.amount} inc GST
+          </p>
+        </div>
+        <Badge tone={invoiceTone(invoice.status)}>{INVOICE_LABEL[invoice.status]}</Badge>
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <div>
+          <div className="mb-1.5 text-sm font-medium">Send via</div>
+          <div className="flex flex-wrap gap-1.5">
+            {SEND_CHANNELS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => {
+                  setChannel(c.id);
+                  const tpl = pickTemplate(templates, invoice, c.id, intent);
+                  if (tpl) applyTemplate(tpl.id, c.id);
+                }}
+                className={cn(
+                  "inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium",
+                  channel === c.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {c.id === "email" ? <Mail className="size-3.5" /> : <MessageSquare className="size-3.5" />}
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">To</span>
+          <Input value={to} readOnly />
+        </label>
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Template</span>
+          <select
+            value={templateId}
+            onChange={(e) => applyTemplate(e.target.value, channel)}
+            className="flex h-9 w-full rounded-md border border-border bg-canvas px-3 text-sm"
+          >
+            {matching.map((tpl) => (
+              <option key={tpl.id} value={tpl.id}>
+                {tpl.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {channel === "email" ? (
+          <label className="block">
+            <span className="mb-1 block text-sm font-medium">Subject</span>
+            <Input value={subject} onChange={(e) => setSubject(e.target.value)} />
+          </label>
+        ) : null}
+
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Message</span>
+          <Textarea value={body} onChange={(e) => setBody(e.target.value)} className="min-h-32" />
+        </label>
+
+        <div className="flex justify-end pt-1">
+          <Button
+            disabled={!canSend}
+            onClick={() => {
+              send({ jobId: job.id, invoiceId: invoice.id, templateId, channel, subject, body });
+              onSent?.();
+            }}
+          >
+            {intent === "reminder" ? "Send reminder" : "Send an invoice"}
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function invoiceBalance(invoice: Invoice, payments: { invoiceId: string; amount: number }[]) {
   const t = totals(invoice.items, invoice.discount);
   const paid = payments.filter((p) => p.invoiceId === invoice.id).reduce((n, p) => n + p.amount, 0);

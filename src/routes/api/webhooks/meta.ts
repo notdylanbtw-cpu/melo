@@ -11,6 +11,8 @@ export const Route = createFileRoute("/api/webhooks/meta")({
         const token = url.searchParams.get("hub.verify_token");
         const challenge = url.searchParams.get("hub.challenge");
         if (mode === "subscribe" && token && challenge) {
+          const expected = (process.env.META_VERIFY_TOKEN ?? "melo-meta").trim();
+          if (token !== expected) return new Response("forbidden", { status: 403 });
           return new Response(challenge, { status: 200 });
         }
         return new Response("forbidden", { status: 403 });

@@ -1,8 +1,9 @@
 export const STRIPE_LINKS: Record<string, string> = {
-  starter: "https://buy.stripe.com/test_9B63cx2Su1T972GdTOgYU00",
-  growth: "https://buy.stripe.com/test_fZubJ33Wy41hfzc6rmgYU01",
-  firm: "https://buy.stripe.com/test_aFabJ378K7dtfzc2b6gYU02",
+  starter: "https://buy.stripe.com/test_9B64gB0KmfJZ3QucPKgYU03",
+  growth: "https://buy.stripe.com/test_cNi00l64GdBRcn0dTOgYU04",
+  firm: "https://buy.stripe.com/test_7sYfZjbp069pcn07vqgYU05",
 };
+
 
 export function checkoutUrl(planId: string, opts?: { email?: string | null; userId?: string }) {
   const base = STRIPE_LINKS[planId] ?? STRIPE_LINKS.growth!;

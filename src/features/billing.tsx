@@ -11,9 +11,12 @@ import {
   PLANS,
   PLAN_ORDER,
   PLAN_COMPARE,
+  VOICE_OVERAGE_PER_MIN,
   annualMonthly,
   invoiceTotals,
   isTrialing,
+  overageExGst,
+  overageMinutes,
   planById,
   planCaps,
   trialDaysLeft,
@@ -35,8 +38,10 @@ export function BillingPane() {
   const toggle = useMelo((s) => s.toggleAddon);
   const reactivate = useMelo((s) => s.reactivatePlan);
   const plan = planById(billing.planId);
-  const caps = planCaps(plan, billing.addons);
-  const upcoming = upcomingTotals(plan, billing.cadence, billing.addons);
+  const caps = planCaps(plan, billing.addons, billing.trialEndsAt);
+  const upcoming = upcomingTotals(plan, billing.cadence, billing.addons, billing.usage.voiceMinutes, billing.trialEndsAt);
+  const overMin = overageMinutes(billing.usage.voiceMinutes, caps.voiceMinutes);
+  const overCost = overageExGst(billing.usage.voiceMinutes, caps.voiceMinutes);
   const price =
     billing.cadence === "annual" ? annualMonthly(plan) : plan.priceMonthly;
 
@@ -60,7 +65,7 @@ export function BillingPane() {
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/25 bg-accent px-4 py-3">
           <div>
             <div className="text-sm font-medium">{trialDaysLeft(billing.trialEndsAt)} days left on the Pro trial</div>
-            <p className="text-sm text-muted-foreground">Switch to Basic or Agency whenever you like. Nothing is locked in.</p>
+            <p className="text-sm text-muted-foreground">Switch to Basic or Agency whenever you like. Trial includes 80 voice minutes, then {money(VOICE_OVERAGE_PER_MIN)} / min.</p>
           </div>
           <Button onClick={() => setChangeOpen(true)}>Change plan</Button>
         </div>
@@ -143,6 +148,9 @@ export function BillingPane() {
               value={billing.cadence === "annual" ? a.priceMonthly * 10 : a.priceMonthly}
             />
           ))}
+          {overMin > 0 ? (
+            <Line label={`Voice overage · ${overMin} min × ${money(VOICE_OVERAGE_PER_MIN)}`} value={overCost} />
+          ) : null}
           <Line label="GST 10%" value={upcoming.gst} muted />
         </div>
       </section>
@@ -151,12 +159,18 @@ export function BillingPane() {
         <div className="mb-3">
           <h2 className="text-sm font-semibold">Usage</h2>
           <p className="text-xs text-muted-foreground">
-            Resets {dt(billing.usage.reset, "d MMM yyyy")}. Overage is blocked until you add capacity — extra minutes are never billed silently.
+            Resets {dt(billing.usage.reset, "d MMM yyyy")}. After the cap, extra minutes are {money(VOICE_OVERAGE_PER_MIN)} each — the receptionist keeps answering.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Meter label="Agent seats" used={billing.usage.seats} max={caps.seats} unit="seats" />
-          <Meter label="Voice minutes" used={billing.usage.voiceMinutes} max={caps.voiceMinutes} unit="min" />
+          <Meter
+            label="Voice minutes"
+            used={billing.usage.voiceMinutes}
+            max={caps.voiceMinutes}
+            unit="min"
+            overage={overMin > 0 ? `${overMin} min over · ${money(overCost)} this period` : `Then ${money(VOICE_OVERAGE_PER_MIN)} / min`}
+          />
           <Meter label="Automations" used={billing.usage.automations} max={caps.automations} unit="live" />
           <Meter label="Team members" used={billing.usage.teamMembers} max={caps.teamMembers} unit="people" />
         </div>
@@ -301,10 +315,23 @@ function Line({ label, value, muted }: { label: string; value: number; muted?: b
   );
 }
 
-function Meter({ label, used, max, unit }: { label: string; used: number; max: number; unit: string }) {
+function Meter({
+  label,
+  used,
+  max,
+  unit,
+  overage,
+}: {
+  label: string;
+  used: number;
+  max: number;
+  unit: string;
+  overage?: string;
+}) {
   const pct = Math.min(100, Math.round((used / Math.max(max, 1)) * 100));
-  const hot = pct >= 90;
+  const hot = pct >= 80;
   const remaining = Math.max(0, max - used);
+  const over = used > max;
   return (
     <div className="rounded-xl border border-border bg-canvas p-4">
       <div className="flex items-baseline justify-between gap-2">
@@ -315,12 +342,17 @@ function Meter({ label, used, max, unit }: { label: string; used: number; max: n
       </div>
       <div className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className={cn("h-full rounded-full transition-[width] duration-200 ease-out", hot ? "bg-warning" : "bg-primary")}
+          className={cn("h-full rounded-full transition-[width] duration-200 ease-out", over ? "bg-warning" : hot ? "bg-warning" : "bg-primary")}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className={cn("mt-2 text-xs", hot ? "text-warning" : "text-muted-foreground")}>
-        {hot ? (used >= max ? "At capacity" : `${remaining} ${unit} left`) : `${remaining.toLocaleString("en-AU")} ${unit} remaining`}
+      <p className={cn("mt-2 text-xs", over || hot ? "text-warning" : "text-muted-foreground")}>
+        {over
+          ? overage ?? `${(used - max).toLocaleString("en-AU")} ${unit} over`
+          : hot
+            ? `${remaining} ${unit} left`
+            : `${remaining.toLocaleString("en-AU")} ${unit} remaining`}
+        {!over && overage && remaining > 0 ? ` · ${overage}` : null}
       </p>
     </div>
   );

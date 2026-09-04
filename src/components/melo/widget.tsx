@@ -29,7 +29,7 @@ export function WidgetOverlay() {
             Licensed plumbing across the Inner West, Burwood and Bondi. The widget on the right uses the same knowledge as Receptionist and Ask Melo.
           </p>
           <pre className="mt-6 overflow-x-auto rounded-lg bg-ink p-4 text-xs text-primary-foreground">
-            {`<script src="https://widget.melo.app/v1.js" data-workspace="northside"></script>`}
+            {`<script src="https://officialmelo.com/widget.js" data-melo="your-office" async></script>`}
           </pre>
         </div>
         <div className="flex h-[min(640px,90vh)] w-full flex-col md:w-[380px] md:border-l md:border-border">

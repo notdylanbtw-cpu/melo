@@ -140,7 +140,7 @@ export function OnboardPage() {
       title: "Business name",
       body: (
         <div className="space-y-3">
-          <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} autoFocus placeholder="Northside Plumbing" />
+          <Input value={businessName} onChange={(e) => setBusinessName(e.target.value)} autoFocus placeholder="Your business name" />
           <Input
             inputMode="url"
             autoComplete="url"

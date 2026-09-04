@@ -1,20 +1,20 @@
 import type { AdminData, ContentEvent, DailyPoint, Tenant, Ticket } from "./types";
 
 const T: Tenant[] = [
-  { id: "northside", name: "Northside Plumbing", industry: "Plumbing", owner: "Alex Chen", email: "alex@northsideplumbing.com.au", plan: "growth", mrr: 349, status: "active", startedAt: "2026-03-12", seats: 7, suburb: "Annandale", lastActiveAt: "2026-09-04T08:04:00+10:00" },
-  { id: "bondi-e", name: "Bondi Electrical", industry: "Electrical", owner: "Priya Shah", email: "priya@bondielectrical.com.au", plan: "firm", mrr: 799, status: "active", startedAt: "2025-11-02", seats: 14, suburb: "Bondi", lastActiveAt: "2026-09-04T07:40:00+10:00" },
-  { id: "inner-hvac", name: "Inner West HVAC", industry: "HVAC", owner: "Marc Nguyen", email: "marc@innerwesthvac.com.au", plan: "growth", mrr: 349, status: "active", startedAt: "2026-01-18", seats: 6, suburb: "Marrickville", lastActiveAt: "2026-09-03T18:12:00+10:00" },
-  { id: "glebe-gas", name: "Glebe Gas & Hot Water", industry: "Gasfitting", owner: "Helen Cho", email: "helen@glebegas.com.au", plan: "starter", mrr: 179, status: "active", startedAt: "2026-06-04", seats: 3, suburb: "Glebe", lastActiveAt: "2026-09-04T09:10:00+10:00" },
-  { id: "parra-plumb", name: "Parramatta Pipe Co", industry: "Plumbing", owner: "Tom Brennan", email: "tom@parrapipe.com.au", plan: "growth", mrr: 349, status: "trial", startedAt: "2026-08-28", seats: 5, suburb: "Parramatta", lastActiveAt: "2026-09-04T06:55:00+10:00" },
-  { id: "coogee-roof", name: "Coogee Roofing", industry: "Roofing", owner: "Samira Ali", email: "samira@coogeeroofing.com.au", plan: "starter", mrr: 179, status: "active", startedAt: "2026-04-21", seats: 3, suburb: "Coogee", lastActiveAt: "2026-09-02T16:40:00+10:00" },
-  { id: "newtown-lock", name: "Newtown Locksmiths", industry: "Locksmith", owner: "James Wilson", email: "james@newtownlocks.com.au", plan: "starter", mrr: 179, status: "active", startedAt: "2026-05-11", seats: 2, suburb: "Newtown", lastActiveAt: "2026-09-03T22:01:00+10:00" },
-  { id: "balmain-build", name: "Balmain Build", industry: "Building", owner: "Mia Thompson", email: "mia@balmainbuild.com.au", plan: "firm", mrr: 799, status: "active", startedAt: "2025-09-30", seats: 18, suburb: "Balmain", lastActiveAt: "2026-09-04T08:50:00+10:00" },
-  { id: "ashfield-clean", name: "Ashfield Cleaning Co", industry: "Cleaning", owner: "Ravi Patel", email: "ravi@ashfieldclean.com.au", plan: "starter", mrr: 179, status: "past_due", startedAt: "2026-02-14", seats: 3, suburb: "Ashfield", lastActiveAt: "2026-08-29T11:20:00+10:00" },
-  { id: "randwick-land", name: "Randwick Landscapes", industry: "Landscaping", owner: "Dez Okonkwo", email: "dez@randwickland.com.au", plan: "growth", mrr: 349, status: "active", startedAt: "2026-07-09", seats: 8, suburb: "Randwick", lastActiveAt: "2026-09-04T07:05:00+10:00" },
-  { id: "mosman-paint", name: "Mosman Painting", industry: "Painting", owner: "Isla Grant", email: "isla@mosmanpainting.com.au", plan: "starter", mrr: 179, status: "cancelled", startedAt: "2026-01-07", seats: 2, suburb: "Mosman", lastActiveAt: "2026-08-12T09:00:00+10:00" },
-  { id: "leich-elec", name: "Leichhardt Electric", industry: "Electrical", owner: "Chris Daly", email: "chris@leichelectric.com.au", plan: "growth", mrr: 349, status: "active", startedAt: "2026-03-01", seats: 6, suburb: "Leichhardt", lastActiveAt: "2026-09-03T14:33:00+10:00" },
-  { id: "surry-pest", name: "Surry Hills Pest", industry: "Pest control", owner: "Nina Rossi", email: "nina@surrypest.com.au", plan: "starter", mrr: 179, status: "active", startedAt: "2026-08-19", seats: 3, suburb: "Surry Hills", lastActiveAt: "2026-09-04T10:12:00+10:00" },
-  { id: "drummoyne-kit", name: "Drummoyne Kitchens", industry: "Joinery", owner: "Owen Blake", email: "owen@drummoynekitchens.com.au", plan: "firm", mrr: 799, status: "active", startedAt: "2025-12-08", seats: 11, suburb: "Drummoyne", lastActiveAt: "2026-09-04T09:40:00+10:00" },
+  { id: "northside", name: "Northside Plumbing", industry: "Plumbing", owner: "Alex Chen", email: "alex@northsideplumbing.com.au", plan: "growth", mrr: 449, status: "active", startedAt: "2026-03-12", seats: 7, suburb: "Annandale", lastActiveAt: "2026-09-04T08:04:00+10:00" },
+  { id: "bondi-e", name: "Bondi Electrical", industry: "Electrical", owner: "Priya Shah", email: "priya@bondielectrical.com.au", plan: "firm", mrr: 999, status: "active", startedAt: "2025-11-02", seats: 14, suburb: "Bondi", lastActiveAt: "2026-09-04T07:40:00+10:00" },
+  { id: "inner-hvac", name: "Inner West HVAC", industry: "HVAC", owner: "Marc Nguyen", email: "marc@innerwesthvac.com.au", plan: "growth", mrr: 449, status: "active", startedAt: "2026-01-18", seats: 6, suburb: "Marrickville", lastActiveAt: "2026-09-03T18:12:00+10:00" },
+  { id: "glebe-gas", name: "Glebe Gas & Hot Water", industry: "Gasfitting", owner: "Helen Cho", email: "helen@glebegas.com.au", plan: "starter", mrr: 249, status: "active", startedAt: "2026-06-04", seats: 3, suburb: "Glebe", lastActiveAt: "2026-09-04T09:10:00+10:00" },
+  { id: "parra-plumb", name: "Parramatta Pipe Co", industry: "Plumbing", owner: "Tom Brennan", email: "tom@parrapipe.com.au", plan: "growth", mrr: 449, status: "trial", startedAt: "2026-08-28", seats: 5, suburb: "Parramatta", lastActiveAt: "2026-09-04T06:55:00+10:00" },
+  { id: "coogee-roof", name: "Coogee Roofing", industry: "Roofing", owner: "Samira Ali", email: "samira@coogeeroofing.com.au", plan: "starter", mrr: 249, status: "active", startedAt: "2026-04-21", seats: 3, suburb: "Coogee", lastActiveAt: "2026-09-02T16:40:00+10:00" },
+  { id: "newtown-lock", name: "Newtown Locksmiths", industry: "Locksmith", owner: "James Wilson", email: "james@newtownlocks.com.au", plan: "starter", mrr: 249, status: "active", startedAt: "2026-05-11", seats: 2, suburb: "Newtown", lastActiveAt: "2026-09-03T22:01:00+10:00" },
+  { id: "balmain-build", name: "Balmain Build", industry: "Building", owner: "Mia Thompson", email: "mia@balmainbuild.com.au", plan: "firm", mrr: 999, status: "active", startedAt: "2025-09-30", seats: 18, suburb: "Balmain", lastActiveAt: "2026-09-04T08:50:00+10:00" },
+  { id: "ashfield-clean", name: "Ashfield Cleaning Co", industry: "Cleaning", owner: "Ravi Patel", email: "ravi@ashfieldclean.com.au", plan: "starter", mrr: 249, status: "past_due", startedAt: "2026-02-14", seats: 3, suburb: "Ashfield", lastActiveAt: "2026-08-29T11:20:00+10:00" },
+  { id: "randwick-land", name: "Randwick Landscapes", industry: "Landscaping", owner: "Dez Okonkwo", email: "dez@randwickland.com.au", plan: "growth", mrr: 449, status: "active", startedAt: "2026-07-09", seats: 8, suburb: "Randwick", lastActiveAt: "2026-09-04T07:05:00+10:00" },
+  { id: "mosman-paint", name: "Mosman Painting", industry: "Painting", owner: "Isla Grant", email: "isla@mosmanpainting.com.au", plan: "starter", mrr: 249, status: "cancelled", startedAt: "2026-01-07", seats: 2, suburb: "Mosman", lastActiveAt: "2026-08-12T09:00:00+10:00" },
+  { id: "leich-elec", name: "Leichhardt Electric", industry: "Electrical", owner: "Chris Daly", email: "chris@leichelectric.com.au", plan: "growth", mrr: 449, status: "active", startedAt: "2026-03-01", seats: 6, suburb: "Leichhardt", lastActiveAt: "2026-09-03T14:33:00+10:00" },
+  { id: "surry-pest", name: "Surry Hills Pest", industry: "Pest control", owner: "Nina Rossi", email: "nina@surrypest.com.au", plan: "starter", mrr: 249, status: "active", startedAt: "2026-08-19", seats: 3, suburb: "Surry Hills", lastActiveAt: "2026-09-04T10:12:00+10:00" },
+  { id: "drummoyne-kit", name: "Drummoyne Kitchens", industry: "Joinery", owner: "Owen Blake", email: "owen@drummoynekitchens.com.au", plan: "firm", mrr: 999, status: "active", startedAt: "2025-12-08", seats: 11, suburb: "Drummoyne", lastActiveAt: "2026-09-04T09:40:00+10:00" },
 ];
 
 const tenants: Tenant[] = T;
@@ -84,7 +84,7 @@ const tickets: Ticket[] = [
     updatedAt: "2026-09-03T17:40:00+10:00",
     messages: [
       { id: "m2", at: "2026-09-03T16:02:00+10:00", from: "customer", author: "Priya Shah", text: "Hit the included minutes after a storm weekend. Can we add a block without changing plan?" },
-      { id: "m3", at: "2026-09-03T17:40:00+10:00", from: "melo", author: "Melo", text: "Yes — Extra voice minutes is A$45/mo for 500. I can turn it on under Bondi Electrical → Billing. Want me to?" },
+      { id: "m3", at: "2026-09-03T17:40:00+10:00", from: "melo", author: "Melo", text: "Yes — extra minutes are A$0.55 each after the cap. The receptionist keeps answering. Want me to flag usage in Billing?" },
     ],
   },
   {

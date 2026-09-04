@@ -1379,7 +1379,7 @@ export const useMelo = create<MeloStore>()(
         };
         set((s) => ({
           integrations: s.integrations.map((i) => {
-            const hit = channels.find((c) => map[c.kind] === i.id);
+            const hit = channels.find((c) => c.kind === i.id || map[c.kind] === i.id);
             if (!hit) return i;
             return {
               ...i,

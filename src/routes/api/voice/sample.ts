@@ -16,7 +16,7 @@ export const Route = createFileRoute("/api/voice/sample")({
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const userId = url.searchParams.get("user")?.trim();
-        const voice = url.searchParams.get("voice")?.trim() || "Isla";
+        const voice = url.searchParams.get("voice")?.trim() || "Mia";
         let text = url.searchParams.get("text")?.trim() || "";
         let elevenKey: string | undefined;
         let elevenVoiceId: string | undefined = defaultElevenVoiceId();
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/voice/sample")({
           elevenVoiceId?: string;
         };
         try {
-          return await audio(body.text || SAMPLE_TEXT, body.voice || "Isla", body.elevenKey, body.elevenVoiceId);
+          return await audio(body.text || SAMPLE_TEXT, body.voice || "Mia", body.elevenKey, body.elevenVoiceId);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Voice failed";
           return Response.json({ error: message }, { status: 502 });

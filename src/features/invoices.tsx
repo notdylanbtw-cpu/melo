@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { SendInvoiceDialog, invoiceBalance } from "@/components/melo/send-invoice";
+import { SendInvoiceDialog, SendInvoicePanel, invoiceBalance } from "@/components/melo/send-invoice";
+import { InvoiceSheet } from "@/components/melo/quote-sheet";
 import { EmptyState } from "@/components/melo/empty";
 import { INVOICE_LABEL } from "@/components/melo/status";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +36,9 @@ export function InvoicesPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
+  const workspace = useMelo((s) => s.workspace);
   const [send, setSend] = useState<{ jobId: string; invoiceId: string; intent: "send" | "reminder" } | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -57,6 +60,7 @@ export function InvoicesPage() {
   const toSend = all.filter((r) => r.invoice.status === "draft" || r.invoice.status === "awaiting_approval").length;
   const overdue = all.filter((r) => r.invoice.status === "overdue").reduce((n, r) => n + r.bal.due, 0);
   const collected = all.filter((r) => r.invoice.status === "paid").reduce((n, r) => n + r.bal.inc, 0);
+  const opened = rows.find((r) => r.invoice.id === openId) ?? rows[0] ?? null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -107,7 +111,11 @@ export function InvoicesPage() {
               </thead>
               <tbody>
                 {rows.map(({ job, customer, invoice, bal }) => (
-                  <tr key={invoice.id} className="border-b border-border hover:bg-muted/40">
+                  <tr
+                    key={invoice.id}
+                    className={cn("border-b border-border hover:bg-muted/40", openId === invoice.id && "bg-muted/50")}
+                    onClick={() => setOpenId(invoice.id)}
+                  >
                     <td className="px-4 py-3 sm:px-6">
                       <div className="font-medium tabular">{invoice.number}</div>
                       <div className="text-xs capitalize text-muted-foreground">{invoice.kind}</div>
@@ -134,7 +142,7 @@ export function InvoicesPage() {
                     <td className="px-3 py-3">
                       <Badge tone={invoiceTone(invoice.status)}>{INVOICE_LABEL[invoice.status]}</Badge>
                     </td>
-                    <td className="px-4 py-3 text-right sm:px-6">
+                    <td className="px-4 py-3 text-right sm:px-6" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-1.5">
                         {sendable(invoice.status) ? (
                           <Button
@@ -169,6 +177,20 @@ export function InvoicesPage() {
             </table>
           </div>
         )}
+        {opened ? (
+          <div className="grid gap-4 border-t border-border p-4 sm:p-6 lg:grid-cols-2">
+            <InvoiceSheet invoice={opened.invoice} job={opened.job} customer={opened.customer} workspace={workspace} />
+            <SendInvoicePanel
+              jobId={opened.job.id}
+              invoiceId={opened.invoice.id}
+              intent={
+                opened.invoice.status === "sent" || opened.invoice.status === "viewed" || opened.invoice.status === "overdue"
+                  ? "reminder"
+                  : "send"
+              }
+            />
+          </div>
+        ) : null}
       </div>
 
       <SendInvoiceDialog

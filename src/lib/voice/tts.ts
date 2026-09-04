@@ -5,12 +5,16 @@ import path from "node:path";
 import { xmlEscape } from "./twilio";
 
 export const SAMPLE_TEXT =
-  "Welcome to Melo A.I. I'm the receptionist that answers as you. I pick up the phone, book the job, take a message, or put them through. After hours, I still answer. I draft quotes, send invoices, and keep the inbox clear, so you can stay on the tools. Train me on your hours, suburbs and services, and every caller hears your business — not a generic bot.";
+  "Hi. I'm Melo. I answer the phone as you — daytime, after hours, in the middle of a job. I can book them in, take a message, or put them through. I draft the quote, send the invoice, keep the inbox from piling up. You stay on the tools. Tell me your hours, your suburbs, the work you do. After that, every caller gets your business.";
 
 const EL_VOICES: Record<string, string> = {
-  Isla: "56bWURjYFHyYyVf490Dp",
-  Matilda: "EXAVITQu4vr4xnSDxMaL",
-  Jack: "IKne3meq5aSn9XLyUdCD",
+  Mia: "Vufs5CYVtQ9JvjTN0Hs4",
+  Jordan: "4uJW3zTppOdNDWtKUtux",
+  Ava: "gJx1vCzNCD1EQHT212Ls",
+  Mac: "I33geqnOHQGKDPUMUspQ",
+  Samantha: "IdDgBtBBVTnSVb4wDvbT",
+  Rachel: "U9VgC8Xinl7nnNsyDd3J",
+  Isla: "Vufs5CYVtQ9JvjTN0Hs4",
 };
 
 const SECRET_FILE = path.join(process.cwd(), ".data/elevenlabs.json");
@@ -43,7 +47,7 @@ export function elevenLabsKey(extra?: string) {
 }
 
 export function defaultElevenVoiceId() {
-  return (process.env.ELEVENLABS_VOICE_ID ?? fileSecret().voiceId ?? EL_VOICES.Isla).trim();
+  return (process.env.ELEVENLABS_VOICE_ID ?? fileSecret().voiceId ?? EL_VOICES.Mia).trim();
 }
 
 async function fromCache(file: string) {
@@ -60,7 +64,7 @@ async function toCache(file: string, bytes: Buffer) {
 }
 
 async function elevenSpeak(text: string, voiceName: string, key: string, voiceId?: string): Promise<Buffer> {
-  const mapped = EL_VOICES[voiceName] || EL_VOICES.Isla;
+  const mapped = EL_VOICES[voiceName] || EL_VOICES.Mia;
   const voice = voiceId?.trim() || mapped;
   const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`, {
     method: "POST",
@@ -72,10 +76,11 @@ async function elevenSpeak(text: string, voiceName: string, key: string, voiceId
     body: JSON.stringify({
       text,
       model_id: "eleven_multilingual_v2",
+      apply_text_normalization: "on",
       voice_settings: {
-        stability: 0.48,
-        similarity_boost: 0.8,
-        style: 0.12,
+        stability: 0.38,
+        similarity_boost: 0.78,
+        style: 0.32,
         use_speaker_boost: true,
       },
     }),
@@ -94,10 +99,10 @@ export async function synthesize(opts: {
   elevenVoiceId?: string;
 }) {
   const text = opts.text.trim().slice(0, 1200) || SAMPLE_TEXT;
-  const voice = opts.voice || "Isla";
+  const voice = opts.voice || "Mia";
   const el = elevenLabsKey(opts.elevenKey);
   if (!el) throw new Error("ElevenLabs isn’t connected");
-  const file = cachePath(text, `${voice}:${opts.elevenVoiceId ?? defaultElevenVoiceId()}`, "eleven");
+  const file = cachePath(`v3:${text}`, `${voice}:${opts.elevenVoiceId ?? defaultElevenVoiceId()}`, "eleven");
   const hit = await fromCache(file);
   if (hit) return hit;
   const bytes = await elevenSpeak(text, voice, el, opts.elevenVoiceId);
@@ -105,7 +110,7 @@ export async function synthesize(opts: {
   return bytes;
 }
 
-export function playTwiML(origin: string, userId: string, text: string, voice = "Isla") {
+export function playTwiML(origin: string, userId: string, text: string, voice = "Mia") {
   const u = new URL("/api/voice/sample", origin);
   u.searchParams.set("user", userId);
   u.searchParams.set("voice", voice);

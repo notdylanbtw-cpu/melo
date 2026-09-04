@@ -4,7 +4,8 @@ import { AskDrawer } from "@/components/melo/ask";
 import { CommandPalette } from "@/components/melo/command";
 import { HelpOverlay } from "@/components/melo/help";
 import { KeyboardShortcuts } from "@/components/melo/shortcuts";
-import { WidgetFab, WidgetOverlay } from "@/components/melo/widget";
+import { WidgetOverlay } from "@/components/melo/widget";
+import { SupportBot } from "@/components/melo/support-bot";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { useMelo } from "@/lib/melo/store";
@@ -54,7 +55,7 @@ export function AppShell({
             <HelpOverlay />
             <KeyboardShortcuts />
             <WidgetOverlay />
-            <WidgetFab />
+            <SupportBot tone="light" surface="app" hidden={askOpen} />
           </>
         )}
       </div>

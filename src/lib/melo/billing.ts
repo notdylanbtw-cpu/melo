@@ -6,42 +6,44 @@ export const PLANS: Plan[] = [
     id: "starter",
     name: "Basic",
     cadence: "monthly",
-    priceMonthly: 179,
+    priceMonthly: 249,
     seats: 3,
     voiceMinutes: 400,
     automations: 10,
     teamMembers: 3,
     blurb: "Reception, inbox and a calendar for a solo operator.",
-    features: ["Receptionist", "Melo number included", "Inbox", "Calendar", "Knowledge", "Website widget"],
+    features: ["Receptionist", "Melo number included", "Melo Computer 24/7", "Inbox", "Calendar", "400 voice minutes"],
   },
   {
     id: "growth",
     name: "Pro",
     cadence: "monthly",
-    priceMonthly: 349,
+    priceMonthly: 449,
     seats: 7,
-    voiceMinutes: 1500,
+    voiceMinutes: 1000,
     automations: 40,
     teamMembers: 8,
     blurb: "The full firm — quotes, reach, review and dispatch.",
-    features: ["Everything in Basic", "Full firm of AI agents", "Pipeline & quotes", "Reach", "Review", "Automations"],
+    features: ["Everything in Basic", "Full firm of AI agents", "Pipeline & quotes", "Reach", "Review", "1,000 voice minutes"],
   },
   {
     id: "firm",
     name: "Agency",
     cadence: "monthly",
-    priceMonthly: 799,
+    priceMonthly: 999,
     seats: 20,
-    voiceMinutes: 5000,
+    voiceMinutes: 2000,
     automations: 200,
     teamMembers: 25,
     blurb: "API keys, white-label, dedicated onboarding, the full stack.",
-    features: ["Everything in Pro", "Specialist packs", "Custom connectors", "API keys", "Priority voice", "SSO-ready workspace"],
+    features: ["Everything in Pro", "Specialist packs", "Custom connectors", "API keys", "Priority voice", "2,000 voice minutes"],
   },
 ];
 
 export const TRIAL_PLAN_ID = "growth";
 export const TRIAL_DAYS = 7;
+export const VOICE_OVERAGE_PER_MIN = 0.55;
+export const TRIAL_VOICE_MINUTES = 80;
 
 export type PlanCompare = {
   id: string;
@@ -55,12 +57,14 @@ export const PLAN_COMPARE: PlanCompare[] = [
     included: [
       "24/7 AI receptionist",
       "Melo number — we buy it, we host it",
+      "Melo Computer — on 24/7",
       "Voice & model hosted by Melo",
       "Inbox — phone, SMS, WhatsApp, Instagram, web",
       "Calendar",
       "Train on your website",
       "Website widget",
       "400 voice minutes / mo",
+      "Then $0.55 / min overage",
       "3 team members",
     ],
     excluded: [
@@ -80,7 +84,8 @@ export const PLAN_COMPARE: PlanCompare[] = [
       "Invoices",
       "Reach & review",
       "40 automations",
-      "1,500 voice minutes / mo",
+      "1,000 voice minutes / mo",
+      "Then $0.55 / min overage",
       "8 team members",
     ],
     excluded: ["Specialist packs", "Custom connectors", "API keys", "Priority voice", "SSO"],
@@ -89,7 +94,8 @@ export const PLAN_COMPARE: PlanCompare[] = [
     id: "firm",
     included: [
       "Everything in Pro",
-      "5,000 voice minutes / mo",
+      "2,000 voice minutes / mo",
+      "Then $0.55 / min overage",
       "25 team members",
       "200 automations",
       "Specialist packs",
@@ -112,7 +118,8 @@ export const COMPARE_GROUPS: { name: string; rows: { label: string; starter: Com
   {
     name: "Volume",
     rows: [
-      { label: "Voice minutes / mo", starter: "400", growth: "1,500", firm: "5,000" },
+      { label: "Voice minutes / mo", starter: "400", growth: "1,000", firm: "2,000" },
+      { label: "Overage / min", starter: "$0.55", growth: "$0.55", firm: "$0.55" },
       { label: "Team members", starter: "3", growth: "8", firm: "25" },
       { label: "Automations", starter: false, growth: "40", firm: "200" },
     ],
@@ -121,7 +128,7 @@ export const COMPARE_GROUPS: { name: string; rows: { label: string; starter: Com
     name: "Front office",
     rows: [
       { label: "Melo number included", starter: true, growth: true, firm: true },
-      { label: "Voice, SMS & model hosted by Melo", starter: true, growth: true, firm: true },
+      { label: "Melo Computer — 24/7", starter: true, growth: true, firm: true },
       { label: "24/7 AI receptionist", starter: true, growth: true, firm: true },
       { label: "Transfers & barge-in", starter: true, growth: true, firm: true },
       { label: "Phone, SMS, WhatsApp, Instagram, web", starter: true, growth: true, firm: true },
@@ -192,19 +199,40 @@ export function invoiceTotals(exGst: number) {
   return { exGst, gst: gstOf(exGst), total: incGst(exGst) };
 }
 
-export function upcomingTotals(plan: Plan, cadence: BillingCadence, addons: BillingAddon[]) {
-  return invoiceTotals(periodExGst(plan, cadence, addons));
+export function upcomingTotals(
+  plan: Plan,
+  cadence: BillingCadence,
+  addons: BillingAddon[],
+  voiceUsed = 0,
+  trialEndsAt?: string | null,
+) {
+  const cap = voiceCap(plan, trialEndsAt);
+  const extra = overageExGst(voiceUsed, cap);
+  return invoiceTotals(periodExGst(plan, cadence, addons) + extra);
+}
+
+export function voiceCap(plan: Plan, trialEndsAt?: string | null): number {
+  if (isTrialing(trialEndsAt)) return TRIAL_VOICE_MINUTES;
+  return plan.voiceMinutes;
+}
+
+export function overageMinutes(used: number, cap: number): number {
+  return Math.max(0, Math.round(used - cap));
+}
+
+export function overageExGst(used: number, cap: number): number {
+  return Math.round(overageMinutes(used, cap) * VOICE_OVERAGE_PER_MIN * 100) / 100;
 }
 
 export function annualMonthly(plan: Plan) {
   return Math.round((plan.priceMonthly * 10) / 12);
 }
 
-export function planCaps(plan: Plan, addons: BillingAddon[]) {
+export function planCaps(plan: Plan, addons: BillingAddon[], trialEndsAt?: string | null) {
   const on = (id: string) => addons.some((a) => a.id === id && a.on);
   return {
     seats: plan.seats + (on("seat") ? 1 : 0),
-    voiceMinutes: plan.voiceMinutes + (on("voice-block") ? 500 : 0),
+    voiceMinutes: voiceCap(plan, trialEndsAt),
     automations: plan.automations,
     teamMembers: plan.teamMembers,
   };

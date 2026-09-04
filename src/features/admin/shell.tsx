@@ -1,5 +1,5 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { BarChart3, FileText, Headphones, Home, LayoutGrid, LifeBuoy } from "lucide-react";
+import { BarChart3, FileText, Headphones, Home, KeyRound, LayoutGrid, LifeBuoy } from "lucide-react";
 import { useAdmin } from "@/lib/admin/store";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +8,7 @@ const NAV = [
   { to: "/admin/subs", label: "Subscribers", icon: LayoutGrid },
   { to: "/admin/content", label: "Content", icon: FileText },
   { to: "/admin/tickets", label: "Tickets", icon: LifeBuoy, badge: true },
+  { to: "/admin/platform", label: "Platform", icon: KeyRound },
 ] as const;
 
 export function AdminShell() {

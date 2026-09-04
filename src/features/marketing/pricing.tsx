@@ -18,7 +18,7 @@ export function PricingPage() {
           <CompareTable />
         </div>
         <p className="mt-10 max-w-lg text-sm text-mkt-muted">
-          Cancel in Billing. The firm stays on until the period ends. Keep your existing number.
+          Extra voice minutes are A$0.55 each. Cancel in Billing. The firm stays on until the period ends. Keep your existing number.
         </p>
         <Link to="/signup" className="mkt-pill-cream mt-8 inline-flex h-12 items-center px-7 text-sm font-semibold">
           Start 7-day trial

@@ -109,7 +109,7 @@ function ComputerStrip() {
           <span className="size-1.5 rounded-full bg-success live-dot" />
           Melo Computer is on
         </span>
-        <span className="block text-xs text-muted-foreground">Sydney · answers the phone and watches the inbox even if you close this tab</span>
+        <span className="block text-xs text-muted-foreground">Sydney · phone, inbox, and taught tasks — even if you close this tab</span>
       </span>
       <span className="text-xs font-medium text-primary">Open</span>
     </Link>

@@ -14,8 +14,11 @@ export const Route = createRootRoute({
       { title: "Melo — AI receptionist for business" },
       { name: "theme-color", content: "#05070c" },
       { name: "description", content: "One platform to run the office — phone, inbox, quotes, calendar, AI agents. Cancel the rest." },
+      { property: "og:url", content: "https://officialmelo.com" },
+      { property: "og:site_name", content: "Melo" },
     ],
     links: [
+      { rel: "canonical", href: "https://officialmelo.com" },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },

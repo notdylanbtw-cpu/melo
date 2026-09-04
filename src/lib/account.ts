@@ -186,6 +186,19 @@ export const applyCheckout = createServerFn({ method: "POST" })
     return { ok: true as const, planId, trialEndsAt: trial };
   });
 
+export async function markAccountPaid(userId: string, planIdRaw: string, status: "trial" | "active" | "canceled") {
+  const planId = ["starter", "growth", "firm"].includes(planIdRaw) ? planIdRaw : "growth";
+  const trial = status === "trial" ? new Date(Date.now() + 7 * 86400000).toISOString() : null;
+  const sql = await getSql();
+  await sql`
+    update accounts set
+      plan_id = ${planId},
+      trial_ends_at = ${trial},
+      billing_status = ${status}
+    where user_id = ${userId}
+  `;
+}
+
 export const persistOfficeCopy = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator((input: { about: string; website?: string; hours: string; afterHours: string; services: string[]; suburbs: string[] }) => input)

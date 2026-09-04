@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
 
-export type ChannelKind = "voice" | "whatsapp" | "messenger" | "facebook" | "instagram" | "imessage" | "widget";
+export type ChannelKind = string;
 
 export const listChannelAccounts = createServerFn({ method: "GET" })
   .middleware([authMiddleware])
@@ -243,6 +243,39 @@ export const connectIMessage = createServerFn({ method: "POST" })
       externalId: data.from.trim(),
       credentials: { provider: data.provider, apiKey: data.apiKey.trim(), from: data.from.trim() },
       detail: `${data.provider} · ${data.from.trim()}`,
+    });
+    return { ok: true as const };
+  });
+
+export const startConnect = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((appId: string) => appId)
+  .handler(async ({ data: appId }) => {
+    const { CONNECT, oauthPath } = await import("@/lib/connect/catalog");
+    const { oauthReady } = await import("@/lib/platform");
+    const spec = CONNECT[appId];
+    if (!spec) return { type: "computer" as const, path: `/app/computer?connect=${encodeURIComponent(appId)}` };
+    if (spec.voice) return { type: "voice" as const, kind: appId === "imessage" ? ("imessage" as const) : ("twilio" as const) };
+    if (spec.oauth && oauthReady(spec.oauth)) {
+      return { type: "redirect" as const, url: oauthPath(spec.oauth, appId) };
+    }
+    const open = spec.login ? `&open=${encodeURIComponent(spec.login)}` : "";
+    return { type: "computer" as const, path: `/app/computer?connect=${encodeURIComponent(appId)}${open}` };
+  });
+
+export const confirmConnect = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator((input: { appId: string; detail?: string }) => input)
+  .handler(async ({ context, data }) => {
+    const db = await import("./db");
+    const kind = data.appId === "twilio" ? "voice" : data.appId;
+    await db.upsertChannel({
+      userId: context.userId,
+      kind,
+      status: "connected",
+      externalId: data.appId,
+      credentials: { provider: "melo-computer" },
+      detail: data.detail || "Signed in on Melo Computer",
     });
     return { ok: true as const };
   });

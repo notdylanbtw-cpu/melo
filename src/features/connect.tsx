@@ -13,8 +13,9 @@ import { useMelo } from "@/lib/melo/store";
 import { cn } from "@/lib/utils";
 import type { Agent, Integration, IntegrationStatus } from "@/lib/melo/types";
 import { ChannelConnectDialog, type ConnectKind } from "@/features/channel-connect";
-import { listChannelAccounts } from "@/lib/channels/actions";
+import { listChannelAccounts, startConnect } from "@/lib/channels/actions";
 import { MeloMark } from "@/components/brand/melo-mark";
+import { toast } from "sonner";
 
 const GROUPS: { id: string; label: string }[] = [
   { id: "voice", label: "Voice" },
@@ -28,15 +29,6 @@ const GROUPS: { id: string; label: string }[] = [
   { id: "web", label: "Web & listings" },
   { id: "collab", label: "Collaboration" },
 ];
-
-const REAL: Record<string, ConnectKind> = {
-  twilio: "twilio",
-  whatsapp: "whatsapp",
-  instagram: "instagram",
-  messenger: "messenger",
-  facebook: "facebook",
-  imessage: "imessage",
-};
 
 const STATUS: Record<IntegrationStatus, string> = {
   connected: "text-success",
@@ -68,16 +60,44 @@ export function ConnectPage() {
   const [connectKind, setConnectKind] = useState<ConnectKind | null>(null);
   const [consentId, setConsentId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [siteWidget, setSiteWidget] = useState({ snippet: "", slug: "", url: "" });
   const sync = useMelo((s) => s.syncChannelStatus);
 
   const refreshChannels = () => {
     void listChannelAccounts()
-      .then((acc) => sync(acc.channels))
+      .then((acc) => {
+        sync(acc.channels);
+        setSiteWidget({ snippet: acc.widgetSnippet, slug: acc.widgetSlug, url: acc.widgetUrl });
+      })
       .catch(() => undefined);
   };
 
   useEffect(() => {
     refreshChannels();
+    if (typeof window === "undefined") return;
+    const q = new URLSearchParams(window.location.search);
+    const app = q.get("app");
+    const google = q.get("google");
+    const meta = q.get("meta");
+    if (google === "ok" && app) {
+      useMelo.getState().connectApp(app, "Google · connected");
+      toast.success("Google connected");
+    } else if (google === "setup") {
+      toast.message("Melo’s Google app isn’t attached yet — opening Melo Computer instead.");
+      if (app) window.location.replace(`/app/computer?connect=${encodeURIComponent(app)}&open=${encodeURIComponent(app === "gcal" ? "https://calendar.google.com" : app === "gbp" ? "https://business.google.com" : "https://mail.google.com")}`);
+    } else if (google === "failed") {
+      toast.error("Google didn’t finish. Try again.");
+    }
+    if (meta === "ok") {
+      toast.success("Facebook connected");
+      refreshChannels();
+    } else if (meta === "setup") {
+      toast.message("Melo’s Facebook app isn’t attached yet — opening Melo Computer instead.");
+      if (app) window.location.replace(`/app/computer?connect=${encodeURIComponent(app)}&open=${encodeURIComponent("https://www.facebook.com/login")}`);
+    } else if (meta === "failed") {
+      toast.error("Facebook didn’t finish. Try again.");
+    }
+    if (google || meta) window.history.replaceState({}, "", window.location.pathname);
   }, []);
 
   const selected = agents.find((a) => a.id === selectedId) ?? agents[0];
@@ -130,6 +150,7 @@ export function ConnectPage() {
                 setStep(0);
                 setWiz(true);
               }}
+              widget={siteWidget}
             />
           </TabsContent>
 
@@ -350,11 +371,13 @@ function AppsPane({
   onQuery,
   onAdd,
   onNew,
+  widget,
 }: {
   query: string;
   onQuery: (v: string) => void;
   onAdd: (id: string) => void;
   onNew: () => void;
+  widget: { snippet: string; slug: string; url: string };
 }) {
   const integrations = useMelo((s) => s.integrations);
   const connectors = useMelo((s) => s.connectors);
@@ -379,6 +402,8 @@ function AppsPane({
           New connector
         </Button>
       </div>
+
+      <WebsiteInstall snippet={widget.snippet} url={widget.url} />
 
       {connected.length ? (
         <section className="mt-8">
@@ -482,10 +507,7 @@ function ConsentScreen({
   onNeedCredentials: (kind: ConnectKind) => void;
 }) {
   const integrations = useMelo((s) => s.integrations);
-  const connectApp = useMelo((s) => s.connectApp);
   const disconnectApp = useMelo((s) => s.disconnectApp);
-  const contact = useMelo((s) => s.billing.contact);
-  const ws = useMelo((s) => s.workspace);
   const [busy, setBusy] = useState(false);
   const item = integrations.find((i) => i.id === id) ?? null;
   const meta = item ? metaFor(item.id, item.name) : null;
@@ -493,18 +515,24 @@ function ConsentScreen({
 
   const allow = () => {
     if (!item) return;
-    const kind = REAL[item.id];
-    if (kind) {
-      onNeedCredentials(kind);
-      return;
-    }
     setBusy(true);
-    window.setTimeout(() => {
-      const who = contact || `${ws.name.toLowerCase().replace(/\s+/g, "")}@gmail.com`;
-      connectApp(item.id, who);
-      setBusy(false);
-      onClose();
-    }, 700);
+    void startConnect({ data: item.id })
+      .then((r) => {
+        if (r.type === "voice") {
+          onNeedCredentials(r.kind);
+          setBusy(false);
+          return;
+        }
+        if (r.type === "redirect") {
+          window.location.href = r.url;
+          return;
+        }
+        window.location.href = r.path;
+      })
+      .catch((err: Error) => {
+        toast.error(err.message);
+        setBusy(false);
+      });
   };
 
   return (
@@ -579,4 +607,48 @@ function ConsentScreen({
     </Dialog>
   );
 }
+
+function WebsiteInstall({ snippet, url }: { snippet: string; url: string }) {
+  const code =
+    snippet ||
+    `<script src="https://officialmelo.com/widget.js" data-melo="your-office" async></script>`;
+  return (
+    <section className="mt-6 rounded-2xl border border-border bg-canvas p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold">Your website</h2>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            Same idea as a live chat bubble on the site. One script — Melo answers as this office, files the thread in Inbox, and can book a window.
+          </p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            void navigator.clipboard.writeText(code);
+            toast.success("Snippet copied");
+          }}
+        >
+          Copy snippet
+        </Button>
+      </div>
+      <pre className="mt-4 overflow-x-auto rounded-xl bg-ink px-4 py-3 text-[12px] leading-relaxed text-primary-foreground">{code}</pre>
+      <ol className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+        <li>
+          <span className="font-medium text-foreground">WordPress</span> — paste before <code className="text-xs">{`</body>`}</code> in the footer, or in a header/footer scripts plugin.
+        </li>
+        <li>
+          <span className="font-medium text-foreground">Shopify</span> — Online Store → Themes → Edit code → <code className="text-xs">theme.liquid</code>, before <code className="text-xs">{`</body>`}</code>.
+        </li>
+        <li>
+          <span className="font-medium text-foreground">Webflow / Squarespace</span> — Site settings → Custom code / Code injection → Footer.
+        </li>
+        <li>
+          <span className="font-medium text-foreground">Any HTML site</span> — last line before <code className="text-xs">{`</body>`}</code>. Preview: {url ? <a className="text-primary underline" href={url} target="_blank" rel="noreferrer">{url}</a> : "saves after first office boot"}.
+        </li>
+      </ol>
+    </section>
+  );
+}
+
 

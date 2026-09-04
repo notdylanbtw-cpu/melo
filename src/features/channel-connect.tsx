@@ -131,10 +131,13 @@ function MeloNumberFields({ onClose, onDone }: { onClose: () => void; onDone?: (
 
 function EnableFields({ kind, onClose, onDone }: { kind: ConnectKind; onClose: () => void; onDone?: () => void }) {
   const [busy, setBusy] = useState(false);
+  const meta = kind === "whatsapp" || kind === "instagram" || kind === "messenger" || kind === "facebook";
   return (
     <div className="mt-4 space-y-4">
       <p className="text-sm text-muted-foreground">
-        Melo pays {label(kind)} and routes it to this office. Callers and messages stay on your Melo Computer.
+        {meta
+          ? "You’ll confirm Melo on Facebook. Messages from that Page land in Inbox."
+          : `Melo pays ${label(kind)} and routes it to this office.`}
       </p>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onClose}>
@@ -143,6 +146,10 @@ function EnableFields({ kind, onClose, onDone }: { kind: ConnectKind; onClose: (
         <Button
           disabled={busy}
           onClick={() => {
+            if (meta) {
+              window.location.href = `/api/oauth/meta?start=${kind}`;
+              return;
+            }
             setBusy(true);
             void enableMeloChannel({ data: kind === "twilio" ? "voice" : kind })
               .then((r) => {
@@ -154,7 +161,7 @@ function EnableFields({ kind, onClose, onDone }: { kind: ConnectKind; onClose: (
               .finally(() => setBusy(false));
           }}
         >
-          {busy ? "Turning on…" : "Turn on"}
+          {busy ? "Turning on…" : meta ? "Continue with Facebook" : "Turn on"}
         </Button>
       </div>
     </div>

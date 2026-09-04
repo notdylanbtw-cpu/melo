@@ -1164,7 +1164,7 @@ export function createSeed(): MeloData {
     ],
     voice: {
       locale: "en-AU",
-      voice: "Isla",
+      voice: "Mia",
       warmth: 64,
       pace: 48,
       greeting: "Northside Plumbing, this is the receptionist speaking. How can I help?",
@@ -1187,12 +1187,11 @@ export function createSeed(): MeloData {
         name: "Alex Chen",
       },
       invoices: [
-        { id: "sub1", number: "MEL-1044", at: "2026-09-03", exGst: 349, status: "paid" },
-        { id: "sub2", number: "MEL-1031", at: "2026-08-03", exGst: 349, status: "paid" },
-        { id: "sub3", number: "MEL-1020", at: "2026-07-03", exGst: 349, status: "paid" },
+        { id: "sub1", number: "MEL-1044", at: "2026-09-03", exGst: 449, status: "paid" },
+        { id: "sub2", number: "MEL-1031", at: "2026-08-03", exGst: 449, status: "paid" },
+        { id: "sub3", number: "MEL-1020", at: "2026-07-03", exGst: 449, status: "paid" },
       ],
       addons: [
-        { id: "voice-block", name: "Extra voice minutes", on: false, note: "500 minutes when you hit the included cap", priceMonthly: 45 },
         { id: "seat", name: "Additional AI agent seat", on: false, note: "One extra specialist beyond the plan", priceMonthly: 39 },
         { id: "pack-trades", name: "Premium trades pack", on: false, note: "Estimator + after-hours triage", priceMonthly: 89 },
       ],

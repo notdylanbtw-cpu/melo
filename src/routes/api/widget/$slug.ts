@@ -7,13 +7,16 @@ export const Route = createFileRoute("/api/widget/$slug")({
       GET: async ({ params }) => {
         const acc = await accountBySlug(params.slug);
         if (!acc) return Response.json({ ok: false, error: "Unknown widget" }, { status: 404 });
+        const after = isAfterHours();
+        const greeting = after
+          ? `Hello! This is Melo, a digital assistant, and you’ve reached ${acc.business_name} after hours. How can I help you today?`
+          : `Hello! This is Melo, a digital assistant for ${acc.business_name}. How can I help you today?`;
         return Response.json({
           ok: true,
           brand: acc.business_name,
-          greeting: acc.about
-            ? `Hi — ${acc.business_name}. ${acc.about.slice(0, 140)}`
-            : `Hi — ${acc.business_name} here. How can I help?`,
+          greeting,
           hours: acc.hours,
+          afterHours: after,
         });
       },
       POST: async ({ request, params }) => {
@@ -53,11 +56,59 @@ export const Route = createFileRoute("/api/widget/$slug")({
         } catch {
           /* */
         }
-        return Response.json({ ok: true, reply: widgetReply(text, acc, params.slug) });
+        const reply = (await smartReply(text, acc, params.slug)) || widgetReply(text, acc, params.slug);
+        return Response.json({ ok: true, reply });
       },
     },
   },
 });
+
+function isAfterHours() {
+  const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
+  const day = now.getDay();
+  const h = now.getHours();
+  if (day === 0 || day === 6) return true;
+  return h < 7 || h >= 17;
+}
+
+async function smartReply(
+  text: string,
+  acc: {
+    business_name: string;
+    about: string;
+    hours: string;
+    after_hours: string;
+    services: string[];
+    suburbs: string[];
+  },
+  slug: string,
+) {
+  const apiKey = process.env.XAI_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const res = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "grok-4.5",
+        max_tokens: 220,
+        temperature: 0.35,
+        messages: [
+          {
+            role: "system",
+            content: `You are Melo, the digital assistant on ${acc.business_name}'s website. Speak as the business. Short replies, 2–4 sentences. Never mention other AI brands. Hours: ${acc.hours || "business hours"}. After hours: ${acc.after_hours || "leave a mobile"}. Services: ${acc.services.join(", ") || "the work on the site"}. Areas: ${acc.suburbs.join(", ") || "the local area"}. About: ${acc.about || ""}. If they want a quote or booking, ask for name, mobile and suburb. Book link: /book/${slug}.`,
+          },
+          { role: "user", content: text },
+        ],
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    return json.choices?.[0]?.message?.content?.trim() || null;
+  } catch {
+    return null;
+  }
+}
 
 function widgetReply(
   text: string,
