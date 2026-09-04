@@ -1,0 +1,7 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { PrivacyPage } from "@/features/marketing/legal";
+
+export const Route = createFileRoute("/privacy")({
+  component: PrivacyPage,
+  head: () => ({ meta: [{ title: "Privacy — Melo" }] }),
+});

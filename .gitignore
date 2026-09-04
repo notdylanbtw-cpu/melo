@@ -1,0 +1,13 @@
+.data/
+.env
+.env.*
+.secrets/
+.data/elevenlabs.json
+node_modules/
+.vercel/
+dist/
+screenshots/
+artifacts/
+attachments/
+.grok/
+.DS_Store
