@@ -8,6 +8,7 @@ import { WidgetFab, WidgetOverlay } from "@/components/melo/widget";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { useMelo } from "@/lib/melo/store";
+import { getComputer } from "@/lib/computer/actions";
 import { cn } from "@/lib/utils";
 
 export function AppShell({
@@ -25,6 +26,7 @@ export function AppShell({
   useEffect(() => {
     if (preview) return;
     void useMelo.persist.rehydrate();
+    void getComputer().catch(() => undefined);
   }, [preview]);
 
   return (

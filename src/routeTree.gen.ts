@@ -28,6 +28,7 @@ import { Route as AdminSubsRouteImport } from './routes/admin/subs'
 import { Route as AdminTicketsRouteImport } from './routes/admin/tickets'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppCalendarRouteImport } from './routes/app/calendar'
+import { Route as AppComputerRouteImport } from './routes/app/computer'
 import { Route as AppConnectRouteImport } from './routes/app/connect'
 import { Route as AppFirmRouteImport } from './routes/app/firm'
 import { Route as AppHireRouteImport } from './routes/app/hire'
@@ -43,6 +44,7 @@ import { Route as PreviewPageRouteImport } from './routes/preview.$page'
 import { Route as SignQuoteIdRouteImport } from './routes/sign.$quoteId'
 import { Route as WSlugRouteImport } from './routes/w.$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiComputerTickRouteImport } from './routes/api/computer/tick'
 import { Route as ApiVoiceGatherRouteImport } from './routes/api/voice/gather'
 import { Route as ApiVoiceHoldRouteImport } from './routes/api/voice/hold'
 import { Route as ApiVoiceInboundRouteImport } from './routes/api/voice/inbound'
@@ -150,6 +152,11 @@ const AppCalendarRoute = AppCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AppRoute,
 } as any)
+const AppComputerRoute = AppComputerRouteImport.update({
+  id: '/computer',
+  path: '/computer',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppConnectRoute = AppConnectRouteImport.update({
   id: '/connect',
   path: '/connect',
@@ -223,6 +230,11 @@ const WSlugRoute = WSlugRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiComputerTickRoute = ApiComputerTickRouteImport.update({
+  id: '/api/computer/tick',
+  path: '/api/computer/tick',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiVoiceGatherRoute = ApiVoiceGatherRouteImport.update({
@@ -299,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/admin/subs': typeof AdminSubsRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/computer': typeof AppComputerRoute
   '/app/connect': typeof AppConnectRoute
   '/app/firm': typeof AppFirmRoute
   '/app/hire': typeof AppHireRoute
@@ -316,6 +329,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/computer/tick': typeof ApiComputerTickRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
   '/api/voice/inbound': typeof ApiVoiceInboundRoute
@@ -344,6 +358,7 @@ export interface FileRoutesByTo {
   '/admin/subs': typeof AdminSubsRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/computer': typeof AppComputerRoute
   '/app/connect': typeof AppConnectRoute
   '/app/firm': typeof AppFirmRoute
   '/app/hire': typeof AppHireRoute
@@ -360,6 +375,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/computer/tick': typeof ApiComputerTickRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
   '/api/voice/inbound': typeof ApiVoiceInboundRoute
@@ -391,6 +407,7 @@ export interface FileRoutesById {
   '/admin/subs': typeof AdminSubsRoute
   '/admin/tickets': typeof AdminTicketsRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/computer': typeof AppComputerRoute
   '/app/connect': typeof AppConnectRoute
   '/app/firm': typeof AppFirmRoute
   '/app/hire': typeof AppHireRoute
@@ -408,6 +425,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/computer/tick': typeof ApiComputerTickRoute
   '/api/voice/gather': typeof ApiVoiceGatherRoute
   '/api/voice/hold': typeof ApiVoiceHoldRoute
   '/api/voice/inbound': typeof ApiVoiceInboundRoute
@@ -440,6 +458,7 @@ export interface FileRouteTypes {
     | '/admin/subs'
     | '/admin/tickets'
     | '/app/calendar'
+    | '/app/computer'
     | '/app/connect'
     | '/app/firm'
     | '/app/hire'
@@ -457,6 +476,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/auth/$'
+    | '/api/computer/tick'
     | '/api/voice/gather'
     | '/api/voice/hold'
     | '/api/voice/inbound'
@@ -485,6 +505,7 @@ export interface FileRouteTypes {
     | '/admin/subs'
     | '/admin/tickets'
     | '/app/calendar'
+    | '/app/computer'
     | '/app/connect'
     | '/app/firm'
     | '/app/hire'
@@ -501,6 +522,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/api/auth/$'
+    | '/api/computer/tick'
     | '/api/voice/gather'
     | '/api/voice/hold'
     | '/api/voice/inbound'
@@ -531,6 +553,7 @@ export interface FileRouteTypes {
     | '/admin/subs'
     | '/admin/tickets'
     | '/app/calendar'
+    | '/app/computer'
     | '/app/connect'
     | '/app/firm'
     | '/app/hire'
@@ -548,6 +571,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/auth/$'
+    | '/api/computer/tick'
     | '/api/voice/gather'
     | '/api/voice/hold'
     | '/api/voice/inbound'
@@ -578,6 +602,7 @@ export interface RootRouteChildren {
   SignQuoteIdRoute: typeof SignQuoteIdRoute
   WSlugRoute: typeof WSlugRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiComputerTickRoute: typeof ApiComputerTickRoute
   ApiVoiceGatherRoute: typeof ApiVoiceGatherRoute
   ApiVoiceHoldRoute: typeof ApiVoiceHoldRoute
   ApiVoiceInboundRoute: typeof ApiVoiceInboundRoute
@@ -723,6 +748,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendarRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/computer': {
+      id: '/app/computer'
+      path: '/computer'
+      fullPath: '/app/computer'
+      preLoaderRoute: typeof AppComputerRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/connect': {
       id: '/app/connect'
       path: '/connect'
@@ -826,6 +858,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/computer/tick': {
+      id: '/api/computer/tick'
+      path: '/api/computer/tick'
+      fullPath: '/api/computer/tick'
+      preLoaderRoute: typeof ApiComputerTickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/voice/gather': {
@@ -954,6 +993,7 @@ const AppReceptionRouteWithChildren = AppReceptionRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppCalendarRoute: typeof AppCalendarRoute
+  AppComputerRoute: typeof AppComputerRoute
   AppConnectRoute: typeof AppConnectRoute
   AppFirmRoute: typeof AppFirmRoute
   AppHireRoute: typeof AppHireRoute
@@ -969,6 +1009,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCalendarRoute: AppCalendarRoute,
+  AppComputerRoute: AppComputerRoute,
   AppConnectRoute: AppConnectRoute,
   AppFirmRoute: AppFirmRoute,
   AppHireRoute: AppHireRoute,
@@ -1012,6 +1053,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignQuoteIdRoute: SignQuoteIdRoute,
   WSlugRoute: WSlugRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiComputerTickRoute: ApiComputerTickRoute,
   ApiVoiceGatherRoute: ApiVoiceGatherRoute,
   ApiVoiceHoldRoute: ApiVoiceHoldRoute,
   ApiVoiceInboundRoute: ApiVoiceInboundRoute,

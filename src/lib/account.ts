@@ -143,6 +143,17 @@ export const completeOnboarding = createServerFn({ method: "POST" })
       where user_id = ${context.userId}
     `;
     const row = await loadOrCreate(context.userId);
+    try {
+      const { bootComputer, logComputer } = await import("@/lib/computer/db");
+      await bootComputer(context.userId);
+      await logComputer({
+        userId: context.userId,
+        kind: "boot",
+        text: `Computer online for ${data.businessName.trim()}`,
+      });
+    } catch {
+      /* computer table may still be migrating */
+    }
     return toAccount(row);
   });
 

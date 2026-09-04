@@ -23,6 +23,20 @@ export const Route = createFileRoute("/api/voice/inbound")({
           phase: "live",
           reason: "Inbound",
         });
+        try {
+          const { logComputer } = await import("@/lib/computer/db");
+          const { ensureComputerDaemon } = await import("@/lib/computer/engine");
+          ensureComputerDaemon();
+          await logComputer({
+            userId: hit.userId,
+            kind: "call",
+            agent: "receptionist",
+            text: `Inbound call from ${fields.from}`,
+            detail: fields.callSid,
+          });
+        } catch {
+          /* */
+        }
         const extras = await getAccountExtras(hit.userId);
         const brand = extras?.business_name || "the office";
         const after = isAfterHoursSydney();

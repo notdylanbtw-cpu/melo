@@ -35,7 +35,7 @@ export function FirmPage() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold">Firm</h1>
-          <p className="text-sm text-muted-foreground">Helix orchestrates these specialists in parallel. Money and public sends still land in Review unless autopilot is Act.</p>
+          <p className="text-sm text-muted-foreground">Helix orchestrates these specialists on Melo Computer. Money and public sends still land in Review unless autopilot is Act.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>

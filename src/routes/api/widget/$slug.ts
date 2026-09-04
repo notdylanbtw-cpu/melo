@@ -39,6 +39,20 @@ export const Route = createFileRoute("/api/widget/$slug")({
             .filter(Boolean)
             .join("\n"),
         });
+        try {
+          const { logComputer } = await import("@/lib/computer/db");
+          const { ensureComputerDaemon } = await import("@/lib/computer/engine");
+          ensureComputerDaemon();
+          await logComputer({
+            userId: acc.user_id,
+            kind: "inbox",
+            agent: "receptionist",
+            text: `Website visitor — ${from}`,
+            detail: text.slice(0, 240),
+          });
+        } catch {
+          /* */
+        }
         return Response.json({ ok: true, reply: widgetReply(text, acc, params.slug) });
       },
     },

@@ -82,6 +82,18 @@ export const Route = createFileRoute("/api/voice/gather")({
           subject: intent === "book" ? "Wants a booking" : "Phone message",
           body: speech,
         });
+        try {
+          const { logComputer } = await import("@/lib/computer/db");
+          await logComputer({
+            userId: hit.userId,
+            kind: "inbox",
+            agent: "receptionist",
+            text: `Took a ${intent} from ${fields.from}`,
+            detail: speech.slice(0, 240),
+          });
+        } catch {
+          /* */
+        }
         const reply =
           after && intent === "human"
             ? `The office is closed. I've taken your number — someone from ${brand} will call first thing.`

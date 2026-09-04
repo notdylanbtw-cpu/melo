@@ -6,6 +6,7 @@ import {
   Home,
   Inbox,
   Kanban,
+  Cpu,
   Headphones,
   Puzzle,
   Radio,
@@ -83,6 +84,7 @@ export const NAV: NavSection[] = [
       },
       { to: "/app/calendar", label: "Calendar", icon: CalendarDays },
       { to: "/app/firm", label: "Firm", icon: Building2 },
+      { to: "/app/computer", label: "Computer", icon: Cpu },
     ],
   },
   {

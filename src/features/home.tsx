@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowUpRight, CalendarCheck, Check, Moon, Phone, X } from "lucide-react";
+import { ArrowUpRight, CalendarCheck, Check, Cpu, Moon, Phone, X } from "lucide-react";
 import { AskChips, AskComposer } from "@/components/melo/ask";
 import { AgentPortrait } from "@/components/melo/portrait";
 import { Badge } from "@/components/ui/badge";
@@ -88,8 +88,31 @@ export function HomePage() {
         </button>
       ) : null}
 
+      <ComputerStrip />
+
       {mode === "command" ? <CommandCentre labels={labels} /> : <OpsDashboard labels={labels} />}
     </div>
+  );
+}
+
+function ComputerStrip() {
+  return (
+    <Link
+      to="/app/computer"
+      className="flex items-center gap-3 rounded-xl border border-border bg-canvas px-4 py-3 text-left transition-colors hover:bg-muted/40"
+    >
+      <span className="flex size-8 items-center justify-center rounded-full bg-success-soft text-success">
+        <Cpu className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2 text-sm font-medium">
+          <span className="size-1.5 rounded-full bg-success live-dot" />
+          Melo Computer is on
+        </span>
+        <span className="block text-xs text-muted-foreground">Sydney · answers the phone and watches the inbox even if you close this tab</span>
+      </span>
+      <span className="text-xs font-medium text-primary">Open</span>
+    </Link>
   );
 }
 
